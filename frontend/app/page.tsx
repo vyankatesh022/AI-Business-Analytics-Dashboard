@@ -413,7 +413,32 @@ export default function Home() {
       <section className="relative mx-auto max-w-7xl px-6 pt-16 pb-12 sm:px-8 z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         
         {/* Left Column: Synchronized Hero Text Carousel */}
-        <div className="lg:col-span-7 text-left flex flex-col justify-center min-h-[380px]">
+        <div className="lg:col-span-7 text-left flex flex-col justify-center min-h-[460px]">
+          {/* Carousel Tabs Navigation Capsule - Premium Dials */}
+          <div className="flex items-center justify-start gap-1.5 p-1 bg-zinc-950/70 border border-zinc-850/80 rounded-2xl max-w-md mb-6 shadow-xl backdrop-blur-md">
+            {[
+              { id: 0, label: "ARR Spline", desc: "Telemetry" },
+              { id: 1, label: "Auto-Sanitize", desc: "Pipeline" },
+              { id: 2, label: "SecOps Matrix", desc: "AppSec" }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setCarouselIndex(tab.id);
+                  setCarouselPlaying(false); // Pause auto-rotation when user clicks
+                }}
+                className={`flex-1 flex flex-col items-center py-2 px-3.5 rounded-xl transition-all cursor-pointer ${
+                  carouselIndex === tab.id 
+                  ? "bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 font-bold shadow-lg shadow-cyan-500/5" 
+                  : "text-zinc-500 hover:text-zinc-350 border border-transparent font-medium"
+                }`}
+              >
+                <span className="text-[10px] tracking-wider uppercase">{tab.label}</span>
+                <span className="text-[7px] opacity-50 font-mono tracking-widest uppercase mt-0.5">{tab.desc}</span>
+              </button>
+            ))}
+          </div>
+
           <AnimatePresence mode="wait">
             {carouselIndex === 0 && (
               <motion.div
@@ -436,7 +461,7 @@ export default function Home() {
                 <h1
                   className={`font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl leading-[1.08] tracking-tight ${
                     isDarkMode 
-                    ? "text-white bg-gradient-to-b from-white via-zinc-100 to-zinc-400 bg-clip-text text-transparent" 
+                    ? "text-white bg-gradient-to-b from-white via-zinc-150 to-zinc-400 bg-clip-text text-transparent" 
                     : "text-slate-900"
                   }`}
                 >
@@ -487,7 +512,7 @@ export default function Home() {
                 <h1
                   className={`font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl leading-[1.08] tracking-tight ${
                     isDarkMode 
-                    ? "text-white bg-gradient-to-b from-white via-zinc-100 to-zinc-400 bg-clip-text text-transparent" 
+                    ? "text-white bg-gradient-to-b from-white via-zinc-150 to-zinc-400 bg-clip-text text-transparent" 
                     : "text-slate-900"
                   }`}
                 >
@@ -538,7 +563,7 @@ export default function Home() {
                 <h1
                   className={`font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl leading-[1.08] tracking-tight ${
                     isDarkMode 
-                    ? "text-white bg-gradient-to-b from-white via-zinc-100 to-zinc-400 bg-clip-text text-transparent" 
+                    ? "text-white bg-gradient-to-b from-white via-zinc-150 to-zinc-400 bg-clip-text text-transparent" 
                     : "text-slate-900"
                   }`}
                 >
@@ -579,7 +604,7 @@ export default function Home() {
         >
           <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/10 to-purple-500/15 rounded-3xl glow-blur filter blur-2xl z-0 pointer-events-none" />
           
-          <div className="relative w-full h-[360px] flex items-center justify-center overflow-hidden rounded-3xl shadow-2xl border border-zinc-850 bg-[#0d111d]/50 backdrop-blur-md p-4 transition-all duration-300 hover:border-cyan-500/40 z-10">
+          <div className="relative w-full h-[360px] flex items-center justify-center overflow-hidden rounded-3xl shadow-2xl border border-zinc-850 bg-[#0d111d]/50 backdrop-blur-md p-4 transition-all duration-300 hover:border-cyan-500/45 z-10">
             <AnimatePresence mode="wait">
               {carouselIndex === 0 && (
                 <motion.div
@@ -592,18 +617,44 @@ export default function Home() {
                 >
                   <div className="flex justify-between items-center border-b border-zinc-850 pb-2 mb-2">
                     <span className="text-[10px] font-mono text-cyan-400 font-bold bg-cyan-500/5 px-2 py-0.5 border border-cyan-500/15 rounded">Slide 1: Grounded Telemetry</span>
-                    <span className="text-[9px] text-zinc-500">Live ARR Chart</span>
+                    <span className="text-[9px] text-zinc-550 font-mono flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" /> Live Telemetry</span>
                   </div>
-                  <div className="flex-1 relative flex items-center justify-center rounded-xl overflow-hidden border border-zinc-900 bg-zinc-950/40">
-                    <Image 
-                      src="/hero_dashboard_illustration.png"
-                      alt="Glow Data Analytics illustration"
-                      width={480}
-                      height={240}
-                      priority
-                      className="rounded-lg object-cover w-full h-full"
-                    />
+                  
+                  {/* Live Interactive SVG Spline Coordinates Grid */}
+                  <div className="flex-1 relative flex flex-col justify-between p-4 rounded-xl border border-zinc-900 bg-zinc-950/70 overflow-hidden">
+                    <div className="flex justify-between items-center text-[9px] text-zinc-500 font-mono">
+                      <span>Telemetry Feed ARR</span>
+                      <span className="flex items-center gap-1 font-bold text-cyan-400">98.4% SENSITIVITY</span>
+                    </div>
+                    {/* SVG Spline with glowing backdrop */}
+                    <svg className="w-full h-32 mt-2" viewBox="0 0 400 120">
+                      <defs>
+                        <linearGradient id="carouselGlow" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#00f2fe" stopOpacity="0.25" />
+                          <stop offset="100%" stopColor="#00f2fe" stopOpacity="0.0" />
+                        </linearGradient>
+                      </defs>
+                      <path d="M 0 100 Q 80 40, 160 80 T 320 20 T 400 60 L 400 120 L 0 120 Z" fill="url(#carouselGlow)" />
+                      <path d="M 0 100 Q 80 40, 160 80 T 320 20 T 400 60" fill="none" stroke="#00f2fe" strokeWidth="2.5" className="drop-shadow-[0_0_6px_rgba(0,242,254,0.4)]" />
+                      <circle cx="160" cy="80" r="4.5" fill="#00f2fe" className="animate-pulse" />
+                      <circle cx="320" cy="20" r="4.5" fill="#00f2fe" className="animate-pulse" />
+                    </svg>
+                    <div className="grid grid-cols-3 gap-2 mt-2 pt-2 border-t border-zinc-900 font-mono text-[9px]">
+                      <div>
+                        <span className="text-zinc-650 block text-[7px] uppercase tracking-wider">ARR TALLY</span>
+                        <span className="text-white font-bold">$428,200</span>
+                      </div>
+                      <div>
+                        <span className="text-zinc-650 block text-[7px] uppercase tracking-wider">ACCURACY</span>
+                        <span className="text-cyan-400 font-bold">98.4%</span>
+                      </div>
+                      <div>
+                        <span className="text-zinc-655 block text-[7px] tracking-wider">LATENCY</span>
+                        <span className="text-purple-400 font-bold">48ms</span>
+                      </div>
+                    </div>
                   </div>
+
                   <p className="text-[10.5px] text-zinc-400 leading-relaxed mt-2.5">
                     Real-time business Arr forecast spline projections grounded using Gemini API context caching indicators.
                   </p>
@@ -621,15 +672,15 @@ export default function Home() {
                 >
                   <div className="flex justify-between items-center border-b border-zinc-850 pb-2 mb-2">
                     <span className="text-[10px] font-mono text-cyan-400 font-bold bg-cyan-500/5 px-2 py-0.5 border border-cyan-500/15 rounded">Slide 2: Asynchronous Cleaning</span>
-                    <span className="text-[9px] text-zinc-500">Active Ingest Terminal</span>
+                    <span className="text-[9px] text-zinc-550 font-mono">Active Ingest Terminal</span>
                   </div>
                   <div className="flex-1 flex flex-col justify-between p-4 rounded-xl border border-zinc-900 bg-zinc-950/80 font-mono text-[9px] leading-relaxed">
-                    <div className="space-y-1 text-zinc-400">
-                      <div><span className="text-cyan-500">&gt;&gt;</span> Ingesting dataset target file...</div>
-                      <div><span className="text-cyan-500">&gt;&gt;</span> Running traversal audits... <span className="text-emerald-400">SECURE</span></div>
-                      <div><span className="text-cyan-500">&gt;&gt;</span> Dropped 14 duplicate indices.</div>
-                      <div><span className="text-cyan-500">&gt;&gt;</span> Imputed 6 missing median nulls.</div>
-                      <div><span className="text-cyan-500">&gt;&gt;</span> Fitting ML forecasts... <span className="text-emerald-400 font-bold">SUCCESS</span></div>
+                    <div className="space-y-1 text-zinc-450">
+                      <div><span className="text-cyan-550 font-bold">&gt;&gt;</span> Ingesting dataset target file...</div>
+                      <div><span className="text-cyan-550 font-bold">&gt;&gt;</span> Running traversal audits... <span className="text-emerald-400 font-bold">SECURE</span></div>
+                      <div><span className="text-cyan-555 font-bold">&gt;&gt;</span> Dropped 14 duplicate indices.</div>
+                      <div><span className="text-cyan-555 font-bold">&gt;&gt;</span> Imputed 6 missing median nulls.</div>
+                      <div><span className="text-cyan-555 font-bold">&gt;&gt;</span> Fitting ML forecasts... <span className="text-cyan-400 font-bold animate-pulse">SUCCESS_</span></div>
                     </div>
                     <div className="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden border border-zinc-850 mt-2">
                       <div className="h-full bg-cyan-400 animate-pulse" style={{ width: "100%" }} />
@@ -652,7 +703,7 @@ export default function Home() {
                 >
                   <div className="flex justify-between items-center border-b border-zinc-850 pb-2 mb-2">
                     <span className="text-[10px] font-mono text-cyan-400 font-bold bg-cyan-500/5 px-2 py-0.5 border border-cyan-500/15 rounded">Slide 3: AppSec Governance</span>
-                    <span className="text-[9px] text-zinc-500">Access Matrix</span>
+                    <span className="text-[9px] text-zinc-550 font-mono">Access Matrix</span>
                   </div>
                   <div className="flex-1 flex flex-col justify-center p-4 rounded-xl border border-zinc-900 bg-zinc-950/80 font-sans text-xs space-y-2">
                     <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-[11px] uppercase tracking-wide">
@@ -668,7 +719,7 @@ export default function Home() {
                       </div>
                       <div className="p-1.5 bg-zinc-900 border border-zinc-850 rounded">
                         <span className="text-zinc-500 block">SECURITY</span>
-                        <span className="text-emerald-455 font-bold">VERIFIED</span>
+                        <span className="text-emerald-400 font-bold">VERIFIED</span>
                       </div>
                     </div>
                   </div>
@@ -684,7 +735,7 @@ export default function Home() {
           <div className="flex items-center gap-3.5 mt-4 z-10">
             <button 
               onClick={() => setCarouselIndex(prev => (prev - 1 + 3) % 3)}
-              className="p-1.5 bg-zinc-900/60 border border-zinc-850 text-zinc-400 hover:text-white rounded-lg hover:border-zinc-700 transition-colors text-xs cursor-pointer"
+              className="p-1.5 bg-zinc-900/60 border border-zinc-850 text-zinc-450 hover:text-white rounded-lg hover:border-zinc-700 transition-colors text-xs cursor-pointer"
               title="Previous slide"
             >
               ◀
@@ -703,7 +754,7 @@ export default function Home() {
             </div>
             <button 
               onClick={() => setCarouselIndex(prev => (prev + 1) % 3)}
-              className="p-1.5 bg-zinc-900/60 border border-zinc-850 text-zinc-400 hover:text-white rounded-lg hover:border-zinc-700 transition-colors text-xs cursor-pointer"
+              className="p-1.5 bg-zinc-900/60 border border-zinc-850 text-zinc-455 hover:text-white rounded-lg hover:border-zinc-700 transition-colors text-xs cursor-pointer"
               title="Next slide"
             >
               ▶
