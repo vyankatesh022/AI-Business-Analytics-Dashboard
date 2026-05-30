@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.2] - 2026-05-30
+
+### Added
+- **Frontend Foundation**: Initialized Next.js App Router workspace utilizing TypeScript, Tailwind CSS, and ESLint configurations (`frontend/package.json`).
+- **Premium UI Styling**: Constructed global CSS variables (`frontend/app/globals.css`) integrating HSL colors, glassmorphism panel styles, and glow micro-animations.
+- **Responsive Landing Page**: Built high-fidelity, interactive sandbox landing page (`frontend/app/page.tsx`) detailing features, pricing tiers, FAQs, and real-time interactive upload simulation panel.
+- **SEO Optimization**: Updated global app layout (`frontend/app/layout.tsx`) adding metadata titles and product descriptions.
+
 ## [0.1.1] - 2026-05-30
 
 ### Added
