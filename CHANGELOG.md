@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.1] - 2026-05-30
+
+### Added
+- **Backend Foundation**: Established base FastAPI asynchronous application (`backend/main.py`).
+- **Startup Configuration**: Created secure environment loader (`backend/config/settings.py`) parsing `.env` dynamically via `pydantic-settings`.
+- **Sanitized Logging**: Integrated a secure standard structured logging filter (`backend/utils/logging.py`) masking secrets, private variables, tokens, and database passwords.
+- **Async Verification Suite**: Structured `backend/tests/conftest.py` and `backend/tests/test_main.py` verifying status routing and security timing configurations.
+- **Dependency Configurations**: Setup `backend/requirements.txt` pinning FastAPI, Uvicorn, and Pydantic versions.
+
 ## [0.1.0] - 2026-05-30
 
 ### Added
