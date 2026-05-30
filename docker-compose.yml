@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # FastAPI Backend Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../docker/backend.Dockerfile
+    container_name: ai_analyst_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env
+    environment:
+      - ENVIRONMENT=development
+      - PORT=8000
+    networks:
+      - ai_network
+
+  # n8n Workflow Automation Service
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: ai_analyst_n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=admin_password_change_me
+      - N8N_PORT=5678
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - ai_network
+
+volumes:
+  n8n_data:
+    driver: local
+
+networks:
+  ai_network:
+    driver: bridge
