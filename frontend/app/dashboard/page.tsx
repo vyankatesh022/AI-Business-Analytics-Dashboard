@@ -108,6 +108,50 @@ interface Comment {
   pinnedTo: string;
 }
 
+// Keyboard shortcuts visual - defined outside render to satisfy ESLint
+const KeyboardShortcutsGuide = ({ isDarkMode, onClose }: { isDarkMode: boolean; onClose: () => void }) => {
+  return (
+    <div className="fixed inset-0 bg-[#000]/65 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className={`p-6 max-w-md w-full border rounded-2xl ${isDarkMode ? "bg-zinc-950 border-zinc-800 text-white" : "bg-white border-slate-200 text-slate-900"}`}>
+        <div className="flex items-center justify-between border-b pb-3 border-zinc-800/50 mb-4">
+          <span className="font-bold flex items-center gap-1.5"><Sliders className="h-4 w-5 text-cyan-400" /> System Shortcuts Guide</span>
+          <button onClick={onClose} className="text-xs px-2 py-1 bg-zinc-900 border border-zinc-800 rounded hover:text-white">Close [Esc]</button>
+        </div>
+        <div className="space-y-3.5 text-xs text-zinc-400">
+          <div className="flex justify-between items-center">
+            <span>Switch to Dashboard Overview</span>
+            <kbd className="px-2 py-1 bg-zinc-900 border border-zinc-800 text-cyan-400 rounded">Alt + 1</kbd>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>View Active Data Connections</span>
+            <kbd className="px-2 py-1 bg-zinc-900 border border-zinc-800 text-cyan-400 rounded">Alt + 2</kbd>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>Open Analytics spline maps</span>
+            <kbd className="px-2 py-1 bg-zinc-900 border border-zinc-800 text-cyan-400 rounded">Alt + 3</kbd>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>Open Ingested Data Grid</span>
+            <kbd className="px-2 py-1 bg-zinc-900 border border-zinc-800 text-cyan-400 rounded">Alt + 4</kbd>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>Audit Asynchronous queue logs</span>
+            <kbd className="px-2 py-1 bg-zinc-900 border border-zinc-800 text-cyan-400 rounded">Alt + 5</kbd>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>Security Event Manager matrix</span>
+            <kbd className="px-2 py-1 bg-zinc-900 border border-zinc-800 text-cyan-400 rounded">Alt + 6</kbd>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>Toggle Keyboard shortcuts</span>
+            <kbd className="px-2 py-1 bg-zinc-900 border border-zinc-800 text-cyan-400 rounded">Alt + H</kbd>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function Dashboard() {
   // Global States
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
@@ -236,6 +280,14 @@ export default function Dashboard() {
   const [authSubtab, setAuthSubtab] = useState<string>("login");
   const [timeoutTriggered, setTimeoutTriggered] = useState<boolean>(false);
 
+  // Alert Manager triggering notification toasts
+  const triggerToast = (msg: string) => {
+    setShowToast(msg);
+    setTimeout(() => {
+      setShowToast(null);
+    }, 2800);
+  };
+
   // Keyboard shortcut event listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -266,58 +318,6 @@ export default function Dashboard() {
       root.classList.remove("theme-dark");
     }
   }, [isDarkMode]);
-
-  // Alert Manager triggering notification toasts
-  const triggerToast = (msg: string) => {
-    setShowToast(msg);
-    setTimeout(() => {
-      setShowToast(null);
-    }, 2800);
-  };
-
-  // Keyboard shortcuts visual
-  const KeyboardShortcutsGuide = () => {
-    return (
-      <div className="fixed inset-0 bg-[#000]/65 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className={`p-6 max-w-md w-full border rounded-2xl ${isDarkMode ? "bg-zinc-950 border-zinc-800 text-white" : "bg-white border-slate-200 text-slate-900"}`}>
-          <div className="flex items-center justify-between border-b pb-3 border-zinc-800/50 mb-4">
-            <span className="font-bold flex items-center gap-1.5"><Sliders className="h-4 w-5 text-cyan-400" /> System Shortcuts Guide</span>
-            <button onClick={() => setShowShortcutsModal(false)} className="text-xs px-2 py-1 bg-zinc-900 border border-zinc-800 rounded hover:text-white">Close [Esc]</button>
-          </div>
-          <div className="space-y-3.5 text-xs text-zinc-400">
-            <div className="flex justify-between items-center">
-              <span>Switch to Dashboard Overview</span>
-              <kbd className="px-2 py-1 bg-zinc-900 border border-zinc-800 text-cyan-400 rounded">Alt + 1</kbd>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>View Active Data Connections</span>
-              <kbd className="px-2 py-1 bg-zinc-900 border border-zinc-800 text-cyan-400 rounded">Alt + 2</kbd>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>Open Analytics spline maps</span>
-              <kbd className="px-2 py-1 bg-zinc-900 border border-zinc-800 text-cyan-400 rounded">Alt + 3</kbd>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>Open Ingested Data Grid</span>
-              <kbd className="px-2 py-1 bg-zinc-900 border border-zinc-800 text-cyan-400 rounded">Alt + 4</kbd>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>Audit Asynchronous queue logs</span>
-              <kbd className="px-2 py-1 bg-zinc-900 border border-zinc-800 text-cyan-400 rounded">Alt + 5</kbd>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>Security Event Manager matrix</span>
-              <kbd className="px-2 py-1 bg-zinc-900 border border-zinc-800 text-cyan-400 rounded">Alt + 6</kbd>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>Toggle Keyboard shortcuts</span>
-              <kbd className="px-2 py-1 bg-zinc-900 border border-zinc-800 text-cyan-400 rounded">Alt + H</kbd>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   // Simulated layout drag-reordering
   const moveWidget = (index: number, direction: "up" | "down") => {
@@ -451,7 +451,7 @@ export default function Dashboard() {
       )}
 
       {/* Keyboard Shortcuts Triggered Modal */}
-      {showShortcutsModal && <KeyboardShortcutsGuide />}
+      {showShortcutsModal && <KeyboardShortcutsGuide isDarkMode={isDarkMode} onClose={() => setShowShortcutsModal(false)} />}
 
       {/* Sidebar Menu Panel */}
       <aside className={`w-64 border-r shrink-0 hidden md:flex flex-col justify-between z-10 transition-colors ${
@@ -2074,7 +2074,7 @@ export default function Dashboard() {
                           <select 
                             value={m.role}
                             onChange={(e) => {
-                              setTeamMembers(teamMembers.map(tm => tm.id === m.id ? { ...tm, role: e.target.value as any } : tm));
+                              setTeamMembers(teamMembers.map(tm => tm.id === m.id ? { ...tm, role: e.target.value as "Super Admin" | "Data Analyst" | "Reviewer" } : tm));
                               triggerToast(`Role assigned for user: ${m.name}`);
                             }}
                             className="bg-zinc-900 border border-zinc-800 rounded px-2 py-1 text-[10px] font-bold text-cyan-400 focus:outline-none"

@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 
 export default function Home() {
+  const [mounted, setMounted] = useState<boolean>(false);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
   const [activeFAQ, setActiveFAQ] = useState<number | null>(null);
   const [dashboardTab, setDashboardTab] = useState<string>("Revenue");
@@ -43,18 +44,25 @@ export default function Home() {
   const [carouselIndex, setCarouselIndex] = useState<number>(0);
   const [carouselPlaying, setCarouselPlaying] = useState<boolean>(true);
 
+  // Mount check to prevent hydration mismatch errors
+  useEffect(() => {
+    setTimeout(() => {
+      setMounted(true);
+    }, 0);
+  }, []);
+
   // Carousel auto-rotation timer
   useEffect(() => {
-    if (!carouselPlaying) return;
+    if (!mounted || !carouselPlaying) return;
     const timer = setInterval(() => {
       setCarouselIndex(prev => (prev + 1) % 3);
     }, 4500);
     return () => clearInterval(timer);
-  }, [carouselPlaying]);
+  }, [mounted, carouselPlaying]);
 
   // Interactive Chat State
   const [chatInput, setChatInput] = useState<string>("");
-  const [chatHistory, setChatHistory] = useState<Array<{ sender: "user" | "ai", text: string, data?: any }>>([
+  const [chatHistory, setChatHistory] = useState<Array<{ sender: "user" | "ai", text: string, data?: Record<string, string | number | boolean> | null }>>([
     { sender: "ai", text: "Welcome to Vibe Analytics. I've securely parsed your SaaS database. Ask me any business intelligence questions or choose a quick prompt below." }
   ]);
   const [isTyping, setIsTyping] = useState<boolean>(false);
@@ -311,6 +319,21 @@ export default function Home() {
       }
     }
   };
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-[#05070f] text-zinc-100 flex items-center justify-center font-sans">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-9 w-9 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-500 flex items-center justify-center animate-pulse">
+            <TrendingUp className="h-5 w-5" />
+          </div>
+          <span className="text-[10px] font-mono text-cyan-400 font-bold uppercase tracking-widest animate-pulse">
+            Booting Vibe Console...
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen relative transition-colors duration-300 ${isDarkMode ? "theme-dark bg-[#05070f] text-zinc-100" : "bg-[#f8fafc] text-slate-800"}`}>
@@ -955,7 +978,7 @@ export default function Home() {
               }`}
             >
               <UploadCloud className="h-10 w-10 text-zinc-500 mx-auto mb-4" />
-              <div className="text-sm font-semibold text-zinc-400">Click here to stage "Corporate_Transactions_May2026.csv"</div>
+              <div className="text-sm font-semibold text-zinc-400">Click here to stage &quot;Corporate_Transactions_May2026.csv&quot;</div>
               <div className="text-[10px] text-zinc-650 mt-1">Simulates uploading an uncleaned client financial table</div>
             </button>
           ) : (
@@ -1190,7 +1213,7 @@ export default function Home() {
                   <span className="text-amber-500 text-xs">★★★★★</span>
                 </div>
                 <p className={`text-sm italic leading-relaxed ${isDarkMode ? "text-zinc-300" : "text-slate-650"}`}>
-                  "{t.quote}"
+                  &ldquo;{t.quote}&rdquo;
                 </p>
               </div>
               
