@@ -44,3 +44,17 @@ frontend/
 3. **XSS Protection**: Controlled rendering using Next.js secure template auto-escaping. Use of `dangerouslySetInnerHTML` is banned.
 4. **CSRF Protection**: Domain restrictions, SameSite cookie configurations, and customized route state verification.
 5. **Secure Environmental Controls**: Next.js environmental variables targeting public resources are prefixed strictly with `NEXT_PUBLIC_`. Private keys are loaded on server-side nodes only.
+
+---
+
+## Interactive Synchronized Hero Carousel
+
+The homepage features a highly visual, play/pause-capable, fully synchronized **Hero Carousel UI** at the top of the landing page:
+
+- **Purpose**: Showcases three core operational capabilities of the platform (Telemetry Forecast, Data Ingest Pipeline, Access Security Matrix) dynamically.
+- **Synchronized Transitions**: Smoothly animates the Left text column (titles, custom badges, descriptions, custom CTAs) and the Right visual mockup cards (interactive spline image, live log terminal feed, RBAC settings) in unison.
+- **Controls & Operations**:
+  - **Auto-Rotation**: Sweeps slides automatically every 4.5 seconds.
+  - **Manual Navigation**: Arrows (`◀` and `▶`) and indicator dots allow quick navigation.
+  - **Freeze Toggle**: Features a **Play / Pause** toggle utilizing custom Lucide icons (`Play` and `Pause`) that stops the automatic rotation interval to let the user examine specific modules indefinitely.
+- **Animation Framework**: Driven entirely by Framer Motion (`AnimatePresence` with `mode="wait"`) using strict typecasts for performance and compile-time verification.
