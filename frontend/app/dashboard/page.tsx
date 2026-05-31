@@ -1452,7 +1452,7 @@ export default function Dashboard() {
                           <input 
                             type="checkbox"
                             checked={selectedRows.length === tableData.length}
-                            onChange={() => {
+                            onChange={(e) => {
                               if (e.target.checked) {
                                 setSelectedRows(tableData.map(t => t.id));
                               } else {
@@ -1492,7 +1492,7 @@ export default function Dashboard() {
                               <input 
                                 type="checkbox"
                                 checked={selectedRows.includes(row.id)}
-                                onChange={() => {
+                                onChange={(e) => {
                                   if (e.target.checked) {
                                     setSelectedRows([...selectedRows, row.id]);
                                   } else {
