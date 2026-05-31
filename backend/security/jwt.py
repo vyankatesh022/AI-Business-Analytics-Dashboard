@@ -13,7 +13,8 @@ def verify_access_token(token: str) -> dict:
             token,
             settings.SUPABASE_JWT_SECRET,
             algorithms=["HS256"],
-            options={"verify_aud": False} # Supabase often uses 'authenticated' as audience
+            audience="authenticated",
+            options={"verify_aud": True} 
         )
         return payload
     except jwt.ExpiredSignatureError:
