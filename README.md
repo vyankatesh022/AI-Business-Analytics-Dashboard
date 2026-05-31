@@ -88,3 +88,12 @@ Security is maintained via a **Zero-Trust AppSec Framework** mapped against a 63
 - **Scroll & Cascade Animations**: Utilized Framer Motion `whileInView` and CSS keyframes (`animate-cascade`) to introduce smooth, sequential animations to tables, dashboard widgets, and landing page elements.
 - **Glassmorphism Metrics**: Upgraded dashboard metric cards with `dashboard-glass` CSS filters and dynamic hover state interaction arrays.
 - **Custom Mouse Cursor**: Added a subtle animated mouse-tracking cursor glow for dark-mode.
+
+### Marketing Website & Landing Experience
+- **Modular Landing Page**: Abstracted the landing UI into reusable modular components (`Hero`, `Features`, `Testimonials`, `FAQ`, `Footer`) utilizing CSS grid and responsive layouts.
+- **Secure Contact Form**: Designed a high-converting Contact page secured with strict Zod validation schemas and autonomous honeypot spam protection.
+- **Legal Compliance & SEO**: Upgraded SEO metadata across the layout and dynamically generated `sitemap.xml` and `robots.txt`. Created dedicated routes for Privacy Policy, Cookie Policy, and Terms of Service.
+- **Pricing Tiers**: Integrated a fluid responsive pricing matrix highlighting Free, Pro, and Enterprise configurations.
+
+### Security & Testing
+- **Local Mock DB Authentication**: Built a seamless local-only database mock authentication interface using `local-users.json` that intentionally bypasses Supabase exclusively during development via strict `NODE_ENV` validation.

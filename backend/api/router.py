@@ -22,7 +22,7 @@ class ChatRequest(BaseModel):
 
 
 @api_router.post("/clean")
-async def clean_data(req: CleanRequest):
+async def clean_data(req: CleanRequest, current_user: dict = Depends(get_current_user)):
     """
     Cleans raw uploaded datasets asynchronously.
     """
@@ -51,7 +51,7 @@ async def get_me(current_user: dict = Depends(get_current_user)):
 
 
 @api_router.post("/ai/chat")
-async def ai_chat(req: ChatRequest):
+async def ai_chat(req: ChatRequest, current_user: dict = Depends(get_current_user)):
     """
     Grounded LLM responses based on dataset schemas.
     """
