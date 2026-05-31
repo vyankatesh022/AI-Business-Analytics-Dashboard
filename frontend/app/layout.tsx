@@ -15,8 +15,21 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://vibeanalytics.com'),
   title: "Vibe Analytics - Asynchronous AI Business Intelligence Dashboard",
   description: "Transform structured tabular data files into predictive recommendations, automated cleaning pipelines, and real-time interactive business intelligence dashboards.",
+  openGraph: {
+    title: "Vibe Analytics - Asynchronous AI Business Intelligence Dashboard",
+    description: "Transform structured tabular data files into predictive recommendations, automated cleaning pipelines, and real-time interactive business intelligence dashboards.",
+    url: "https://vibeanalytics.com",
+    siteName: "Vibe Analytics",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Vibe Analytics",
+    description: "Asynchronous AI Business Intelligence Dashboard",
+  }
 };
 
 export default function RootLayout({

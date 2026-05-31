@@ -31,10 +31,14 @@ import {
   Pause
 } from "lucide-react";
 
+import { FeaturesSection } from "@/components/landing/FeaturesSection";
+import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
+import { FAQSection } from "@/components/landing/FAQSection";
+import { Footer } from "@/components/landing/Footer";
+
 export default function Home() {
   const [mounted, setMounted] = useState<boolean>(false);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
-  const [activeFAQ, setActiveFAQ] = useState<number | null>(null);
   const [dashboardTab, setDashboardTab] = useState<string>("Revenue");
   
   // Carousel State
@@ -168,45 +172,6 @@ export default function Home() {
 
   const { timeSaved, recoveredLoss } = calculateROI();
 
-  const faqs = [
-    {
-      q: "How does the platform secure my business data?",
-      a: "Every upload is isolated via Row-Level Security (RLS) in Supabase and encrypted at rest using AES-256. Our backend contains active checks against Path Traversal, Zip Bombs, and malicious code injection."
-    },
-    {
-      q: "Can I self-host the n8n automation pipelines?",
-      a: "Yes. The platform provides full support for custom webhook endpoints, enabling you to integrate either with our hosted n8n platform or connect seamlessly to your own self-hosted n8n infrastructure."
-    },
-    {
-      q: "What AI models are powering the recommendations engine?",
-      a: "We natively integrate the Gemini 1.5 Pro API utilizing context caching, ensuring highly optimized context structures and minimal token wastage for complex datasets and tabular reasoning."
-    },
-    {
-      q: "What is the difference between Pro and Premium ML plans?",
-      a: "Pro unlocks standard AI insights, SQL generation, and chat tools. Premium ML activates predictive algorithms (XGBoost, Scikit-learn) for direct model fitting, anomaly alerts, and churn forecasting."
-    }
-  ];
-
-  const testimonials = [
-    {
-      name: "Marcus Vance",
-      role: "VP of Growth, RetailFlow",
-      quote: "Vibe Analytics caught a 14% cart leakage trend within 3 hours of setup. The automated n8n pipeline was live by that afternoon.",
-      growth: "+14.2% Cart Recovery"
-    },
-    {
-      name: "Elena Rostova",
-      role: "CTO, SaaSGrow Inc.",
-      quote: "The Gemini API grounding and context caching keeps our token usage minimal. Tabular insights are compiled directly and accurately.",
-      growth: "80% AI Token Savings"
-    },
-    {
-      name: "Sanjay Patel",
-      role: "Head of Operations, FinStream",
-      quote: "Zero trust controls are critical for our data. Row-Level Security and secure inputs filters gave our AppSec team complete peace of mind.",
-      growth: "Zero Security Vulnerabilities"
-    }
-  ];
 
   // Dynamic Chart SVG scaled reactively with the Monthly Revenue Slider
   const renderInteractiveChart = () => {
@@ -1146,186 +1111,16 @@ export default function Home() {
       </section>
 
       {/* Feature Grid Section */}
-      <section id="features" className="mx-auto max-w-7xl px-6 py-12 sm:px-8 z-10 border-t border-zinc-900/40">
-        <div className="text-center mb-16">
-          <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-            Clean Architecture. Zero Trust Security.
-          </h2>
-          <p className="mt-4 text-zinc-400 max-w-lg mx-auto text-sm">
-            Our engineering foundation maps against distinct AppSec validations to ensure absolute data isolation.
-          </p>
-        </div>
-
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
-          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
-        >
-          
-          <motion.div 
-            variants={fadeInUp}
-            whileHover={{ y: -4 }}
-            className={`border p-8 rounded-2xl text-left transition-all ${isDarkMode ? "bg-zinc-900/40 border-zinc-800/50" : "bg-white border-slate-100 shadow-sm"}`}
-          >
-            <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-500 mb-6">
-              <FileSpreadsheet className="h-5 w-5" />
-            </div>
-            <h3 className="text-lg font-bold mb-2">Automated Clean & Parse</h3>
-            <p className="text-zinc-500 text-sm leading-relaxed">
-              Asynchronously removes duplicates, corrects datatypes, cleans outlier gaps, and intercepts suspicious MIME payloads before storage updates.
-            </p>
-          </motion.div>
-
-          <motion.div 
-            variants={fadeInUp}
-            whileHover={{ y: -4 }}
-            className={`border p-8 rounded-2xl text-left transition-all ${isDarkMode ? "bg-zinc-900/40 border-zinc-800/50" : "bg-white border-slate-100 shadow-sm"}`}
-          >
-            <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-500 mb-6">
-              <BarChart3 className="h-5 w-5" />
-            </div>
-            <h3 className="text-lg font-bold mb-2">Interactive EDA Pipelines</h3>
-            <p className="text-zinc-500 text-sm leading-relaxed">
-              Generate highly fluid distributions, correlations, scatter systems, and heatmaps structured inside reactive client-side dashboard panels.
-            </p>
-          </motion.div>
-
-          <motion.div 
-            variants={fadeInUp}
-            whileHover={{ y: -4 }}
-            className={`border p-8 rounded-2xl text-left transition-all ${isDarkMode ? "bg-zinc-900/40 border-zinc-800/50" : "bg-white border-slate-100 shadow-sm"}`}
-          >
-            <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-500 mb-6">
-              <BrainCircuit className="h-5 w-5" />
-            </div>
-            <h3 className="text-lg font-bold mb-2">Asynchronous ML Forecasting</h3>
-            <p className="text-zinc-500 text-sm leading-relaxed">
-              Unlock robust predictive model configurations (XGBoost, Scikit-learn) calculating customer expansion rates and future churn windows.
-            </p>
-          </motion.div>
-
-        </motion.div>
-      </section>
+      <FeaturesSection isDarkMode={isDarkMode} />
 
       {/* TESTIMONIALS SECTION */}
-      <section id="testimonials" className="mx-auto max-w-7xl px-6 py-12 sm:px-8 z-10 border-t border-zinc-900/40">
-        <div className="text-center mb-16">
-          <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-            Proven Growth Outcomes
-          </h2>
-          <p className="mt-4 text-zinc-400 max-w-lg mx-auto text-sm">
-            Read how SaaS developers and growth leaders utilize our asynchronous pipelines to catch leakages.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto text-left">
-          {testimonials.map((t, idx) => (
-            <motion.div 
-              key={idx} 
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: idx * 0.1 }}
-              whileHover={{ y: -3 }}
-              className={`border p-6 rounded-2xl flex flex-col justify-between transition-all ${
-                isDarkMode ? "bg-zinc-900/30 border-zinc-800/50" : "bg-white border-slate-150 shadow-sm"
-              }`}
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] font-mono text-cyan-500 bg-cyan-500/5 border border-cyan-500/15 px-2 py-0.5 rounded font-bold">
-                    {t.growth}
-                  </span>
-                  <span className="text-amber-500 text-xs">★★★★★</span>
-                </div>
-                <p className={`text-sm italic leading-relaxed ${isDarkMode ? "text-zinc-300" : "text-slate-650"}`}>
-                  &ldquo;{t.quote}&rdquo;
-                </p>
-              </div>
-              
-              <div className="mt-6 border-t border-zinc-850 pt-4 flex items-center gap-3">
-                <div className="h-8 w-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center font-bold text-xs text-cyan-500">
-                  {t.name[0]}
-                </div>
-                <div>
-                  <div className={`text-xs font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>{t.name}</div>
-                  <div className="text-[10px] text-zinc-500 mt-0.5">{t.role}</div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+      <TestimonialsSection isDarkMode={isDarkMode} />
 
       {/* FAQs */}
-      <section id="faq" className="max-w-4xl mx-auto px-6 py-20 z-10 relative">
-        <motion.div
-          initial={{ y: 40, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="text-center mb-16">
-            <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-              Frequently Asked Questions
-            </h2>
-          </div>
-
-          <div className="flex flex-col gap-4 text-left">
-            {faqs.map((faq, idx) => (
-              <div key={idx} className={`border rounded-xl overflow-hidden transition-all ${isDarkMode ? "bg-zinc-900/30 border-zinc-800/50" : "bg-white border-slate-200"}`}>
-                <button 
-                  onClick={() => setActiveFAQ(activeFAQ === idx ? null : idx)}
-                  className="w-full flex items-center justify-between p-5 text-left font-medium hover:bg-cyan-500/5 transition-colors"
-                >
-                  <span className="flex items-center gap-3 text-sm">
-                    <HelpCircle className="h-4.5 w-4.5 text-cyan-500 flex-shrink-0" />
-                    {faq.q}
-                  </span>
-                  <ChevronDown className={`h-4 w-4 text-zinc-400 transition-transform ${activeFAQ === idx ? "rotate-180" : ""}`} />
-                </button>
-                <AnimatePresence initial={false}>
-                  {activeFAQ === idx && (
-                    <motion.div 
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.25 }}
-                      className={`px-5 pb-5 pt-1 text-sm border-t leading-relaxed ${isDarkMode ? "text-zinc-400 border-zinc-800/30" : "text-slate-650 border-slate-100"}`}
-                    >
-                      {faq.a}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      </section>
+      <FAQSection isDarkMode={isDarkMode} />
 
       {/* Footer */}
-      <footer className={`border-t py-12 text-[10px] text-zinc-500 transition-colors z-10 relative ${isDarkMode ? "border-zinc-900/60 bg-[#02040a]" : "border-slate-200 bg-white"}`}>
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2">
-            <div className="h-6 w-6 flex items-center justify-center rounded bg-cyan-500/10 border border-cyan-500/20 text-cyan-500">
-              <TrendingUp className="h-3.5 w-3.5" />
-            </div>
-            <span className="font-display font-bold text-sm">Vibe Analytics</span>
-          </div>
-
-          <div className="flex items-center gap-8">
-            <Link href="/privacy" className="hover:text-zinc-300">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-zinc-300">Terms of Service</Link>
-            <Link href="/appsec" className="hover:text-zinc-300">AppSec Audits</Link>
-          </div>
-
-          <div>
-            © {new Date().getFullYear()} Vibe Analytics SaaS Inc. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      <Footer isDarkMode={isDarkMode} />
 
     </div>
   );
