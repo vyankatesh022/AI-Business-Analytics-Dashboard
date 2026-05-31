@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile
 from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Literal
 import pandas as pd
 import io
 
@@ -12,6 +12,9 @@ data_cleaning_router = APIRouter()
 
 class ApplyCleaningRequest(BaseModel):
     operations: List[Dict[str, Any]]
+
+class AnalyzeRequest(BaseModel):
+    model: Literal["heuristic", "gemini-1.5-flash", "gpt-4o"] = "heuristic"
 
 async def fetch_dataset_df(user_id: str, dataset_id: str) -> tuple:
     """Helper to fetch dataset as a DataFrame."""
@@ -36,6 +39,11 @@ async def fetch_dataset_df(user_id: str, dataset_id: str) -> tuple:
         dataset = data[0]
         storage_path = dataset["filename"]
         
+        # Enforce max size limit (50MB) before downloading/parsing into Pandas
+        size_bytes = dataset.get("size_bytes", 0)
+        if size_bytes > 50 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="Dataset is too large to be processed (Max 50MB)")
+            
         # Download from storage
         res_file = await client.get(f"/storage/v1/object/datasets/{storage_path}")
         if res_file.status_code >= 400:
@@ -52,7 +60,11 @@ async def fetch_dataset_df(user_id: str, dataset_id: str) -> tuple:
         return df, dataset
 
 @data_cleaning_router.post("/{dataset_id}/cleaning/analyze")
-async def analyze_dataset_for_cleaning(dataset_id: str, current_user: dict = Depends(get_current_user)):
+async def analyze_dataset_for_cleaning(
+    dataset_id: str, 
+    req: AnalyzeRequest = AnalyzeRequest(), 
+    current_user: dict = Depends(get_current_user)
+):
     """
     Analyzes the dataset and returns a cleaning quality report and recommendations.
     """
@@ -61,7 +73,8 @@ async def analyze_dataset_for_cleaning(dataset_id: str, current_user: dict = Dep
     
     metadata = {
         "enforce_auth": True,
-        "user_id": user_id
+        "user_id": user_id,
+        "model": req.model
     }
     
     report = DataCleaningEngine.analyze(df, metadata)

@@ -88,12 +88,13 @@ export const renameDataset = async (datasetId: string, newName: string): Promise
   return res.json();
 };
 
-export const analyzeDataset = async (datasetId: string): Promise<any> => {
+export const analyzeDataset = async (datasetId: string, model: string = 'heuristic'): Promise<any> => {
   const res = await fetch(`${API_BASE_URL}/datasets/${datasetId}/cleaning/analyze`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-    }
+    },
+    body: JSON.stringify({ model })
   });
 
   if (!res.ok) {

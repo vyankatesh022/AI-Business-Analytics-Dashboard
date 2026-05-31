@@ -32,7 +32,8 @@ class DataCleaningEngine:
         outlier_report = OutlierAgent.detect_outliers(df)
 
         # 4. Generate Recommendations
-        recommendations = RecommendationAgent.generate_recommendations(val_report, outlier_report)
+        model = metadata.get("model", "heuristic") if metadata else "heuristic"
+        recommendations = RecommendationAgent.generate_recommendations(val_report, outlier_report, model)
 
         return {
             "validation_report": val_report,

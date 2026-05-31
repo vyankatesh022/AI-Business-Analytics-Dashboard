@@ -76,7 +76,7 @@ class CleaningAgent:
                     continue
                 invalid_type = op.get("invalid_type")
                 if invalid_type == "email":
-                    pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+                    pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
                     mask = df_cleaned[col].astype(str).str.match(pattern, na=False) | df_cleaned[col].isna()
                     df_cleaned.loc[~mask, col] = np.nan
                 elif invalid_type == "phone":

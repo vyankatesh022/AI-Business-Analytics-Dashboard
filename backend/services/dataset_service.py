@@ -148,10 +148,11 @@ async def process_and_store_dataset(user_id: str, file: UploadFile) -> dict:
             "sample": sample_rows
         }
 
-        storage_path = f"{user_id}/{file.filename}"
+        dataset_id = str(uuid.uuid4())
+        storage_path = f"{user_id}/{dataset_id}.{file_ext}"
         
         dataset_record = {
-            "id": str(uuid.uuid4()),
+            "id": dataset_id,
             "user_id": user_id,
             "filename": storage_path,
             "original_filename": file.filename,
