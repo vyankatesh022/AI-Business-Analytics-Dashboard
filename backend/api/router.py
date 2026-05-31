@@ -30,13 +30,24 @@ async def clean_data(req: CleanRequest):
     return result
 
 
+from fastapi import APIRouter, Depends
+from backend.auth.dependencies import get_current_user, require_role
+
 @api_router.post("/ml/forecast")
-async def ml_forecast(req: ForecastRequest):
+async def ml_forecast(req: ForecastRequest, current_user: dict = Depends(require_role(["Pro", "Admin"]))):
     """
     Fits prediction models on tabular arrays.
+    Requires Pro or Admin role.
     """
     result = await fit_forecast_model(req.historical_data)
     return result
+
+@api_router.get("/auth/me")
+async def get_me(current_user: dict = Depends(get_current_user)):
+    """
+    Returns the current authenticated user's payload.
+    """
+    return current_user
 
 
 @api_router.post("/ai/chat")

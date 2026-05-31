@@ -13,7 +13,7 @@ class Settings(BaseSettings):
         alias="CORS_ORIGINS")
 
     # Security
-    JWT_SECRET: str = Field(alias="JWT_SECRET")
+    SUPABASE_JWT_SECRET: str = Field(alias="SUPABASE_JWT_SECRET")
 
     # Supabase (PostgreSQL)
     SUPABASE_DB_URL: str = Field(
@@ -60,14 +60,14 @@ class Settings(BaseSettings):
             raise ValueError(f"ENVIRONMENT must be one of {allowed}")
         return v
 
-    @field_validator("JWT_SECRET")
+    @field_validator("SUPABASE_JWT_SECRET")
     @classmethod
     def validate_jwt_secret(cls, v: str, info) -> str:
         # Enforce high-entropy checks in production envs
         env = os.getenv("ENVIRONMENT", "development")
         if env == "production" and (len(v) < 32 or "your_jwt_secret" in v):
             raise ValueError(
-                "JWT_SECRET must be at least 32 characters long in production")
+                "SUPABASE_JWT_SECRET must be at least 32 characters long in production")
         return v
 
     model_config = SettingsConfigDict(
