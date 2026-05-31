@@ -1,19 +1,14 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
   TrendingUp, 
   Sparkles, 
   ShieldCheck, 
-  ArrowLeft, 
   FileSpreadsheet, 
-  BrainCircuit, 
   Zap, 
-  FolderLock, 
   BarChart3, 
-  Bot, 
-  Check, 
   Activity,
   Sun, 
   Moon, 
@@ -29,34 +24,21 @@ import {
   User,
   Plus,
   Trash2,
-  Edit,
   Settings,
   Key,
   Lock,
   Database,
-  Calendar,
-  Download,
   Share2,
   FileDown,
-  Clock,
   Trash,
-  PlusCircle,
   LogOut,
-  Globe,
   Users,
   MessageSquare,
-  HelpCircle,
   Briefcase,
   Bookmark,
   ChevronRight,
-  Grid,
-  Filter,
   CheckCircle,
-  XCircle,
   AlertCircle,
-  Eye,
-  ChevronDown,
-  UserCheck,
   LayoutGrid
 } from "lucide-react";
 
@@ -83,14 +65,6 @@ interface Job {
   category: string;
 }
 
-interface AuditLog {
-  id: string;
-  timestamp: string;
-  user: string;
-  action: string;
-  ip: string;
-  risk: "low" | "medium" | "high";
-}
 
 interface TeamMember {
   id: string;
@@ -223,7 +197,6 @@ export default function Dashboard() {
   const [tableSearch, setTableSearch] = useState<string>("");
   const [tableSortDir, setTableSortDir] = useState<"asc" | "desc">("desc");
   const [tableSortCol, setTableSortCol] = useState<string>("rev");
-  const [tablePage, setTablePage] = useState<number>(1);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [tableData, setTableData] = useState([
     { id: "r-1", date: "2026-05-28", client: "Enterprise segment Alpha", rev: 14200, churn: "1.2%", status: "Approved" },
@@ -240,7 +213,6 @@ export default function Dashboard() {
     { id: "k-2", name: "Backup Daemon Access Key", key: "vb_live_992h...bb01", created: "2026-05-25" }
   ]);
   const [newKeyName, setNewKeyName] = useState<string>("");
-  const [showMfaModal, setShowMfaModal] = useState<boolean>(false);
   const [mfaEnabled, setMfaEnabled] = useState<boolean>(false);
 
   // Access Control Matrix State
@@ -264,12 +236,7 @@ export default function Dashboard() {
     { id: "t-2", name: "Marcus Vance", email: "marcus@vibeanalytics.com", role: "Data Analyst", status: "Active" },
     { id: "t-3", name: "Sanjay Patel", email: "sanjay@vibeanalytics.com", role: "Reviewer", status: "Active" }
   ]);
-  const [systemLogs, setSystemLogs] = useState<string[]>([
-    "System Startup Config... OK",
-    "Supabase credentials verification... PASSED",
-    "Grounded ML regression models loaded: 4 active arrays.",
-    "n8n Webhook listeners synced successfully."
-  ]);
+
   const [backups, setBackups] = useState<Array<{ id: string; timestamp: string; size: string; status: string }>>([
     { id: "b-1", timestamp: "2026-05-28 04:00", size: "18.4 MB", status: "Stable" },
     { id: "b-2", timestamp: "2026-05-29 04:00", size: "18.6 MB", status: "Stable" }
@@ -408,7 +375,7 @@ export default function Dashboard() {
       triggerToast("Tabular dataset successfully clean-sanitized.");
       
       // Add the cleaned records to the data table
-      const newItems = data.cleaned_data.map((item: any, i: number) => ({
+      const newItems = data.cleaned_data.map((item: { client: string; rev: number | null; churn: string; status: string }, i: number) => ({
         id: `r-api-${Date.now()}-${i}`,
         date: new Date().toISOString().split("T")[0],
         client: item.client,
@@ -1485,7 +1452,7 @@ export default function Dashboard() {
                           <input 
                             type="checkbox"
                             checked={selectedRows.length === tableData.length}
-                            onChange={(e) => {
+                            onChange={() => {
                               if (e.target.checked) {
                                 setSelectedRows(tableData.map(t => t.id));
                               } else {
@@ -1525,7 +1492,7 @@ export default function Dashboard() {
                               <input 
                                 type="checkbox"
                                 checked={selectedRows.includes(row.id)}
-                                onChange={(e) => {
+                                onChange={() => {
                                   if (e.target.checked) {
                                     setSelectedRows([...selectedRows, row.id]);
                                   } else {

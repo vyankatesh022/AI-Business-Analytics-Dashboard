@@ -5,6 +5,7 @@ from typing import AsyncGenerator, Generator
 from httpx import ASGITransport, AsyncClient
 from backend.main import app
 
+
 @pytest.fixture(scope="session")
 def event_loop() -> Generator:
     """Create a unified session-scoped event loop for async unit checks."""
@@ -14,6 +15,7 @@ def event_loop() -> Generator:
         loop = asyncio.new_event_loop()
     yield loop
     loop.close()
+
 
 @pytest_asyncio.fixture(scope="module")
 async def client() -> AsyncGenerator[AsyncClient, None]:

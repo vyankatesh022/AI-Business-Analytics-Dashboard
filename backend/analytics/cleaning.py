@@ -1,5 +1,6 @@
 from typing import List, Dict, Any
 
+
 async def run_clean_pipeline(data: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
     Asynchronously parses, deduplicates, and imputes missing values in tabular datasets.
@@ -9,7 +10,7 @@ async def run_clean_pipeline(data: List[Dict[str, Any]]) -> Dict[str, Any]:
 
     seen = set()
     unique_data = []
-    
+
     for row in data:
         try:
             # Simple hashing to detect duplicates
@@ -30,7 +31,7 @@ async def run_clean_pipeline(data: List[Dict[str, Any]]) -> Dict[str, Any]:
                 # Mock median imputation (simplification for dashboard preview)
                 row[k] = 0
                 has_null = True
-                
+
         if has_null:
             row["status"] = "Imputed Median"
             imputed += 1

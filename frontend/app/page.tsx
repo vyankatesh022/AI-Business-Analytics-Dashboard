@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   TrendingUp, 
@@ -11,8 +11,6 @@ import {
   ArrowRight, 
   FileSpreadsheet, 
   BrainCircuit, 
-  Zap, 
-  FolderLock, 
   BarChart3, 
   Bot, 
   Check, 
@@ -29,7 +27,6 @@ import {
   Send,
   UploadCloud,
   FileText,
-  AlertTriangle,
   Play,
   Pause
 } from "lucide-react";
@@ -77,7 +74,6 @@ export default function Home() {
   const [chatHistory, setChatHistory] = useState<Array<{ sender: "user" | "ai", text: string, data?: Record<string, string | number | boolean> | null }>>([
     { sender: "ai", text: "Welcome to Vibe Analytics. I've securely parsed your SaaS database. Ask me any business intelligence questions or choose a quick prompt below." }
   ]);
-  const [isTyping, setIsTyping] = useState<boolean>(false);
 
   // Tabular Ingest Simulator state
   const [rawView, setRawView] = useState<boolean>(true);
@@ -86,17 +82,17 @@ export default function Home() {
   const [ingestProgress, setIngestProgress] = useState<number>(0);
   const [stagedFileName, setStagedFileName] = useState<string>("");
 
-  const [rawRows, setRawRows] = useState([
+  const rawRows = [
     { date: "2026-01", rev: "$12,000", churn: "2.4%", status: "Ok" },
     { date: "2026-02", rev: "Null", churn: "2.8%", status: "Missing Val" },
     { date: "2026-02", rev: "$14,500", churn: "2.8%", status: "Duplicate Row" },
     { date: "2026-03", rev: "$18,200", churn: "12.4%", status: "Anomaly Outlier" }
-  ]);
-  const [cleanedRows, setCleanedRows] = useState([
+  ];
+  const cleanedRows = [
     { date: "2026-01", rev: "$12,000", churn: "2.4%", status: "Sanitized" },
     { date: "2026-02", rev: "$13,250", churn: "2.8%", status: "Imputed Median" },
     { date: "2026-03", rev: "$18,200", churn: "2.5%", status: "Outlier Capped" }
-  ]);
+  ];
 
   // Interactive ROI Calculator State
   const [monthlyRevenue, setMonthlyRevenue] = useState<number>(120000);
@@ -116,7 +112,6 @@ export default function Home() {
     const nextHistory = [...chatHistory, { sender: "user" as const, text: userText }];
     setChatHistory(nextHistory);
     setChatInput("");
-    setIsTyping(true);
 
     try {
       const response = await fetch("/api/ai/chat", {
@@ -129,10 +124,8 @@ export default function Home() {
       
       const data = await response.json();
       setChatHistory([...nextHistory, { sender: "ai" as const, text: data.response, data: data.data }]);
-    } catch (error) {
+    } catch {
       setChatHistory([...nextHistory, { sender: "ai" as const, text: "Sorry, I encountered an error connecting to the backend." }]);
-    } finally {
-      setIsTyping(false);
     }
   };
 

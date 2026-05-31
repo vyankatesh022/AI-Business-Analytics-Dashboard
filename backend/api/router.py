@@ -7,15 +7,19 @@ from backend.ml.models import fit_forecast_model
 
 api_router = APIRouter()
 
+
 class CleanRequest(BaseModel):
     data: List[Dict[str, Any]]
+
 
 class ForecastRequest(BaseModel):
     historical_data: List[Dict[str, Any]]
 
+
 class ChatRequest(BaseModel):
     message: str
     context: Optional[Dict[str, Any]] = None
+
 
 @api_router.post("/clean")
 async def clean_data(req: CleanRequest):
@@ -25,6 +29,7 @@ async def clean_data(req: CleanRequest):
     result = await run_clean_pipeline(req.data)
     return result
 
+
 @api_router.post("/ml/forecast")
 async def ml_forecast(req: ForecastRequest):
     """
@@ -33,13 +38,14 @@ async def ml_forecast(req: ForecastRequest):
     result = await fit_forecast_model(req.historical_data)
     return result
 
+
 @api_router.post("/ai/chat")
 async def ai_chat(req: ChatRequest):
     """
     Grounded LLM responses based on dataset schemas.
     """
     message = req.message.lower()
-    
+
     if "churn" in message or "retention" in message:
         return {
             "response": "I've run a customer churn correlation audit. We identified 18 high-risk accounts in Tier-2 corporate segments with over 30 days of inactivity. Immediate action proposed: trigger automated re-engagement workflows via n8n.",
