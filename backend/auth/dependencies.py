@@ -1,13 +1,40 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from backend.security.jwt import verify_access_token
+import os
+import json
+from urllib.parse import unquote
 
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
+def get_current_user(request: Request, credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
     """
     Extracts the Bearer token, verifies it, and returns the user payload.
+    Supports mock auth bypass in development.
     """
+    # 1. Check for mock cookie in development
+    if os.getenv("ENVIRONMENT", "development") == "development":
+        mock_cookie = request.cookies.get("vibe_mock_auth")
+        if mock_cookie:
+            try:
+                decoded_cookie = unquote(mock_cookie)
+                payload = json.loads(decoded_cookie)
+                if "user" in payload:
+                    user_data = payload["user"]
+                    if "app_metadata" not in user_data:
+                        user_data["app_metadata"] = {"role": "Admin"}
+                    return user_data
+            except Exception as e:
+                print(f"Mock auth cookie parse error: {e}")
+
+    # 2. Otherwise expect Bearer token
+    if not credentials:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+        
     token = credentials.credentials
     payload = verify_access_token(token)
     return payload

@@ -18,7 +18,7 @@ export interface Dataset {
   updated_at: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 export const uploadDataset = async (file: File): Promise<Dataset> => {
   const formData = new FormData();

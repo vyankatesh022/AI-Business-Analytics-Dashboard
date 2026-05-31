@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 ALLOWED_EXTENSIONS = {"csv", "xlsx"}
 ALLOWED_MIME_TYPES = {
     "text/csv",
+    "text/plain",  # python-magic often detects CSVs as text/plain
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 }
 

@@ -16,6 +16,29 @@ supabase_key: str = settings.SUPABASE_SERVICE_ROLE_KEY
 if not supabase_url or not supabase_key:
     logger.warning("Supabase URL or Key is missing. Dataset storage won't work.")
 
+import uuid
+from datetime import datetime
+
+LOCAL_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "local-datasets.json")
+
+def _is_mock_mode():
+    env = os.getenv("ENVIRONMENT", "development")
+    is_template = "your_project_ref" in supabase_url or "[project_ref]" in supabase_url or "localhost" in supabase_url
+    return env == "development" and is_template
+
+def _load_mock_db():
+    if os.path.exists(LOCAL_DB_PATH):
+        try:
+            with open(LOCAL_DB_PATH, "r") as f:
+                return json.load(f)
+        except Exception:
+            return []
+    return []
+
+def _save_mock_db(data):
+    with open(LOCAL_DB_PATH, "w") as f:
+        json.dump(data, f, indent=2)
+
 # Helper to get httpx client with correct headers
 def get_supabase_client():
     return httpx.AsyncClient(
@@ -105,7 +128,7 @@ def process_xlsx(content: bytes) -> tuple:
 async def process_and_store_dataset(user_id: str, file: UploadFile) -> dict:
     try:
         content = await file.read()
-        file.seek(0)
+        await file.seek(0)
         size_bytes = len(content)
 
         file_ext = file.filename.rsplit(".", 1)[-1].lower()
@@ -124,6 +147,27 @@ async def process_and_store_dataset(user_id: str, file: UploadFile) -> dict:
 
         storage_path = f"{user_id}/{file.filename}"
         
+        dataset_record = {
+            "id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "filename": storage_path,
+            "original_filename": file.filename,
+            "size_bytes": size_bytes,
+            "row_count": row_count,
+            "column_count": column_count,
+            "metadata": metadata,
+            "status": "processed",
+            "created_at": datetime.utcnow().isoformat(),
+            "updated_at": datetime.utcnow().isoformat()
+        }
+
+        if _is_mock_mode():
+            logger.info(f"Using mock mode for dataset {file.filename}")
+            db = _load_mock_db()
+            db.insert(0, dataset_record)
+            _save_mock_db(db)
+            return dataset_record
+        
         async with get_supabase_client() as client:
             # Upload to storage
             res_storage = await client.post(
@@ -135,20 +179,15 @@ async def process_and_store_dataset(user_id: str, file: UploadFile) -> dict:
                 raise Exception(f"Storage upload failed: {res_storage.text}")
 
             # Insert metadata into Database
-            dataset_record = {
-                "user_id": user_id,
-                "filename": storage_path,
-                "original_filename": file.filename,
-                "size_bytes": size_bytes,
-                "row_count": row_count,
-                "column_count": column_count,
-                "metadata": metadata,
-                "status": "processed"
-            }
+            # remove id, created_at, updated_at to let db handle it
+            db_record = dataset_record.copy()
+            del db_record["id"]
+            del db_record["created_at"]
+            del db_record["updated_at"]
 
             res_db = await client.post(
                 "/rest/v1/datasets",
-                json=dataset_record,
+                json=db_record,
                 headers={"Prefer": "return=representation"}
             )
             
@@ -166,6 +205,10 @@ async def process_and_store_dataset(user_id: str, file: UploadFile) -> dict:
 
 
 async def get_user_datasets(user_id: str):
+    if _is_mock_mode():
+        db = _load_mock_db()
+        return [d for d in db if d.get("user_id") == user_id]
+
     async with get_supabase_client() as client:
         res = await client.get(
             f"/rest/v1/datasets?user_id=eq.{user_id}&order=created_at.desc"
@@ -176,6 +219,14 @@ async def get_user_datasets(user_id: str):
 
 
 async def delete_dataset(user_id: str, dataset_id: str):
+    if _is_mock_mode():
+        db = _load_mock_db()
+        new_db = [d for d in db if not (d.get("id") == dataset_id and d.get("user_id") == user_id)]
+        if len(db) == len(new_db):
+            raise HTTPException(status_code=404, detail="Dataset not found or unauthorized")
+        _save_mock_db(new_db)
+        return {"message": "Dataset deleted successfully"}
+
     async with get_supabase_client() as client:
         # Verify ownership
         res_get = await client.get(f"/rest/v1/datasets?id=eq.{dataset_id}&user_id=eq.{user_id}&select=filename")
@@ -195,6 +246,16 @@ async def delete_dataset(user_id: str, dataset_id: str):
 
 
 async def rename_dataset(user_id: str, dataset_id: str, new_name: str):
+    if _is_mock_mode():
+        db = _load_mock_db()
+        for d in db:
+            if d.get("id") == dataset_id and d.get("user_id") == user_id:
+                d["original_filename"] = new_name
+                d["updated_at"] = datetime.utcnow().isoformat()
+                _save_mock_db(db)
+                return d
+        raise HTTPException(status_code=404, detail="Dataset not found or unauthorized")
+
     async with get_supabase_client() as client:
         res = await client.patch(
             f"/rest/v1/datasets?id=eq.{dataset_id}&user_id=eq.{user_id}",
