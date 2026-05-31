@@ -30,9 +30,25 @@ export async function updateSession(request: NextRequest) {
   // Do not run code between createServerClient and
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with cross-site request forgery attacks.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  let user = null;
+
+  // STRICTLY LOCAL DEV: Mock Authentication Bypass
+  if (process.env.NODE_ENV !== 'production' && request.cookies.has('vibe_mock_auth')) {
+    try {
+      const mockCookie = request.cookies.get('vibe_mock_auth');
+      if (mockCookie && mockCookie.value) {
+        user = JSON.parse(mockCookie.value).user;
+      }
+    } catch (e) {
+      console.error("Failed to parse mock auth cookie");
+    }
+  }
+
+  // Fallback to actual Supabase authentication if no mock exists
+  if (!user) {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  }
 
   // Define protected routes that require authentication
   const protectedRoutes = ['/dashboard', '/uploads', '/reports', '/billing']

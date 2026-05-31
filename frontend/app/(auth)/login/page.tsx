@@ -43,6 +43,31 @@ export default function LoginPage() {
     });
   };
 
+  const handleMockLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch('/api/mock-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'login', email, password })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Mock Database Login Failed");
+      }
+
+      router.push("/dashboard");
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#05070f] text-zinc-100 flex items-center justify-center p-6 relative overflow-hidden">
       <div className="absolute top-[-200px] left-1/3 w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none" />
@@ -125,6 +150,15 @@ export default function LoginPage() {
               </svg>
               Sign in with Google
             </button>
+
+            {process.env.NODE_ENV !== "production" && (
+              <button
+                onClick={handleMockLogin}
+                className="w-full mt-3 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 text-purple-400 font-medium py-2 rounded-lg text-sm flex justify-center items-center gap-2 transition-all"
+              >
+                [Dev] Login via Local Mock DB
+              </button>
+            )}
           </div>
 
           <p className="mt-6 text-center text-sm text-zinc-500">

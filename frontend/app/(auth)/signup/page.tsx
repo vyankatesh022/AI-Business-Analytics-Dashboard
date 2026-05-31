@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { Lock, Mail, User, ArrowRight, Loader2, TrendingUp } from "lucide-react";
 
@@ -12,6 +13,7 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +50,32 @@ export default function SignupPage() {
         redirectTo: `${location.origin}/auth/callback`,
       },
     });
+  };
+
+  const handleMockSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const res = await fetch('/api/mock-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'signup', email, password })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Mock Database Signup Failed");
+      }
+
+      router.push("/dashboard");
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message);
+      setLoading(false);
+    }
   };
 
   return (
@@ -150,6 +178,15 @@ export default function SignupPage() {
               </svg>
               Sign up with Google
             </button>
+
+            {process.env.NODE_ENV !== "production" && (
+              <button
+                onClick={handleMockSignup}
+                className="w-full mt-3 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 text-purple-400 font-medium py-2 rounded-lg text-sm flex justify-center items-center gap-2 transition-all"
+              >
+                [Dev] Sign up via Local Mock DB
+              </button>
+            )}
           </div>
 
           <p className="mt-6 text-center text-sm text-zinc-500">
