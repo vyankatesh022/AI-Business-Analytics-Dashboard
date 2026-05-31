@@ -87,3 +87,37 @@ export const renameDataset = async (datasetId: string, newName: string): Promise
 
   return res.json();
 };
+
+export const analyzeDataset = async (datasetId: string): Promise<any> => {
+  const res = await fetch(`${API_BASE_URL}/datasets/${datasetId}/cleaning/analyze`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.detail || 'Failed to analyze dataset');
+  }
+
+  return res.json();
+};
+
+export const cleanDataset = async (datasetId: string, operations: any[]): Promise<any> => {
+  const res = await fetch(`${API_BASE_URL}/datasets/${datasetId}/cleaning/apply`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ operations })
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.detail || 'Failed to apply cleaning operations');
+  }
+
+  return res.json();
+};
+

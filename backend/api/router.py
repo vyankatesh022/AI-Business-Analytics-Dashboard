@@ -10,6 +10,8 @@ from backend.api.datasets import datasets_router
 api_router = APIRouter()
 
 api_router.include_router(datasets_router, prefix="/datasets", tags=["Datasets"])
+from backend.api.data_cleaning import data_cleaning_router
+api_router.include_router(data_cleaning_router, prefix="/datasets", tags=["Data Cleaning"])
 
 class CleanRequest(BaseModel):
     data: List[Dict[str, Any]]

@@ -9,12 +9,17 @@ export interface MockUser {
   created_at: string;
 }
 
-const getDbPath = () => path.join(process.cwd(), 'local-users.json');
+const getDbDir = () => path.join(process.cwd(), 'temp');
+const getDbPath = () => path.join(getDbDir(), 'local-users.json');
 
 // Ensure this utility is absolutely never invoked in a production environment
 const ensureDevMode = () => {
   if (process.env.NODE_ENV === 'production') {
     throw new Error("SECURITY FAULT: Mock Database invoked in production environment!");
+  }
+  const dbDir = getDbDir();
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
   }
 };
 

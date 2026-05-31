@@ -19,7 +19,8 @@ if not supabase_url or not supabase_key:
 import uuid
 from datetime import datetime
 
-LOCAL_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "local-datasets.json")
+LOCAL_DB_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "temp")
+LOCAL_DB_PATH = os.path.join(LOCAL_DB_DIR, "local-datasets.json")
 
 def _is_mock_mode():
     env = os.getenv("ENVIRONMENT", "development")
@@ -27,6 +28,8 @@ def _is_mock_mode():
     return env == "development" and is_template
 
 def _load_mock_db():
+    if not os.path.exists(LOCAL_DB_DIR):
+        os.makedirs(LOCAL_DB_DIR, exist_ok=True)
     if os.path.exists(LOCAL_DB_PATH):
         try:
             with open(LOCAL_DB_PATH, "r") as f:

@@ -49,7 +49,9 @@ export async function POST(request: Request) {
       path: '/'
     });
 
-    return NextResponse.json({ success: true, user });
+    // Remove password before sending to client
+    const { password: _, ...safeUser } = user;
+    return NextResponse.json({ success: true, user: safeUser });
   } catch (error) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
