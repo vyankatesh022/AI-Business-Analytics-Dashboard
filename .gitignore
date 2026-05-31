@@ -87,3 +87,8 @@ Thumbs.db
 *.sqlite3
 *.db
 .pypirc
+
+# Local Uploads / Datasets
+uploads/
+temp/
+datasets/

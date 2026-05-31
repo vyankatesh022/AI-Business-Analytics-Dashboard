@@ -95,5 +95,10 @@ Security is maintained via a **Zero-Trust AppSec Framework** mapped against a 63
 - **Legal Compliance & SEO**: Upgraded SEO metadata across the layout and dynamically generated `sitemap.xml` and `robots.txt`. Created dedicated routes for Privacy Policy, Cookie Policy, and Terms of Service.
 - **Pricing Tiers**: Integrated a fluid responsive pricing matrix highlighting Free, Pro, and Enterprise configurations.
 
+### Datasets Management
+- **Dataset API & Storage**: Added robust endpoints for dataset uploads, integrating with Supabase Storage for secure file handling.
+- **File Validation**: Implemented strict backend file validation verifying MIME types and structure for datasets (`.csv`, `.xlsx`).
+- **Frontend Datasets Dashboard**: Developed a comprehensive React interface for uploading, previewing, and managing datasets with drag-and-drop components (`react-dropzone`).
+
 ### Security & Testing
 - **Local Mock DB Authentication**: Built a seamless local-only database mock authentication interface using `local-users.json` that intentionally bypasses Supabase exclusively during development via strict `NODE_ENV` validation.

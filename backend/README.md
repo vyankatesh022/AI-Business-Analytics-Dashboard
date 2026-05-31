@@ -29,7 +29,7 @@ backend/
 ├── security/             # Input sanitizers, cryptographic tools, and rate limiting engines
 ├── schemas/              # Structured Pydantic data schemas matching frontend Zod objects
 ├── models/               # Domain databases data mappings
-├── services/             # Core application transactions and database updates
+├── services/             # Core application transactions, dataset processing logic, and database updates
 ├── config/               # Secure configuration loader validating variables on system startup
 ├── utils/                # Asynchronous logger utilities, files, and common helpers
 └── tests/                # System integrations and async unit test cases
@@ -42,5 +42,6 @@ backend/
 1. **JWT & RBAC Validation**: Validated on every private path request, verified against active Supabase user signatures.
 2. **SQL Injection Protection**: Complete avoidance of raw query strings. Parametrized bindings are strictly enforced.
 3. **API Rate Limiting**: Managed via custom endpoint throttling middleware to prevent credential stuffing and token exhaustion.
-4. **Malware Scan & File Rules**: Safe MIME verification whitelist checks (`.csv`, `.xlsx`) restricting storage file sizes.
+4. **Malware Scan & File Rules**: Safe MIME verification whitelist checks (`.csv`, `.xlsx`) restricting storage file sizes via `file_validator.py`.
 5. **Secure Cryptography**: Password storage is completely hashed using Argon2id/Bcrypt. Plain text storage is strictly forbidden.
+6. **Dataset Processing**: Memory-safe parsing for CSV and XLSX files in `dataset_service.py` to securely extract metadata and samples before Supabase transmission.

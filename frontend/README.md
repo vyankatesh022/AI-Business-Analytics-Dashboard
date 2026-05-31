@@ -47,6 +47,14 @@ frontend/
 
 ---
 
+## Datasets Management
+
+- **File Uploads**: Implemented `react-dropzone` for secure drag-and-drop dataset uploading.
+- **Dataset Previews**: Developed highly responsive tables rendering a fast preview of dataset columns and metadata using `shadcn/ui` components.
+- **API Integration**: Connected frontend actions directly to FastAPI dataset endpoints for smooth data ingestion.
+
+---
+
 ## Interactive Synchronized Hero Carousel
 
 The homepage features a highly visual, play/pause-capable, fully synchronized **Hero Carousel UI** at the top of the landing page:
