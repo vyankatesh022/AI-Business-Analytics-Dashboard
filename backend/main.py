@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from backend.config.settings import settings
 from backend.utils.logging import logger
+from backend.api.router import api_router
 
 # Initialize production-grade FastAPI application
 app = FastAPI(
@@ -13,6 +14,9 @@ app = FastAPI(
     docs_url=None if settings.ENVIRONMENT == "production" else "/docs",
     redoc_url=None if settings.ENVIRONMENT == "production" else "/redoc"
 )
+
+# Mount main API router
+app.include_router(api_router, prefix="/api")
 
 # Apply global CORS configuration boundaries
 app.add_middleware(

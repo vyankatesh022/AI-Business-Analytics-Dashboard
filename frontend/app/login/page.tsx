@@ -5,7 +5,7 @@ import Link from "next/link";
 import { TrendingUp, Lock, Mail, ArrowRight, ArrowLeft, Sun, Moon } from "lucide-react";
 
 export default function Login() {
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);

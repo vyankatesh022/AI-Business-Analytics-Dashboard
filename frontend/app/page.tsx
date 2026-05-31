@@ -36,13 +36,25 @@ import {
 
 export default function Home() {
   const [mounted, setMounted] = useState<boolean>(false);
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [activeFAQ, setActiveFAQ] = useState<number | null>(null);
   const [dashboardTab, setDashboardTab] = useState<string>("Revenue");
   
   // Carousel State
   const [carouselIndex, setCarouselIndex] = useState<number>(0);
   const [carouselPlaying, setCarouselPlaying] = useState<boolean>(true);
+  
+  // Custom Mouse Tracking State
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  // Carousel auto-rotation timer
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
 
   // Mount check to prevent hydration mismatch errors
   useEffect(() => {
@@ -96,7 +108,7 @@ export default function Home() {
   ];
 
   // Smart keyword-based AI responder
-  const handleChatSubmit = (e: React.FormEvent) => {
+  const handleChatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatInput.trim()) return;
 
@@ -106,58 +118,22 @@ export default function Home() {
     setChatInput("");
     setIsTyping(true);
 
-    setTimeout(() => {
-      let aiResponse = "";
-      let aiData = null;
-      const cleanText = userText.toLowerCase();
-
-      if (cleanText.includes("churn") || cleanText.includes("retention")) {
-        aiResponse = "I've run a customer churn correlation audit. We identified 18 high-risk accounts in Tier-2 corporate segments with over 30 days of inactivity. Immediate action proposed: trigger automated re-engagement workflows via n8n.";
-        aiData = {
-          riskCount: 18,
-          potentialLoss: `$${Math.round(monthlyRevenue * 0.025).toLocaleString()}/mo`,
-          actionTrigger: "n8n segment_reengage"
-        };
-      } else if (cleanText.includes("anomaly") || cleanText.includes("outlier") || cleanText.includes("spike")) {
-        aiResponse = "Anomaly detected: EU sales segments recorded a +24.8% growth spike on Thursdays between 6 PM and 9 PM. This correlates strongly with our newly launched referral campaign. I suggest scaling server allocations to prevent latency spikes.";
-        aiData = {
-          anomalySpike: "+24.8%",
-          confidence: "98.4%",
-          trafficClass: "EU Segment"
-        };
-      } else if (cleanText.includes("basket") || cleanText.includes("size") || cleanText.includes("checkout")) {
-        aiResponse = "Cart abandonment audit completed. E-commerce metrics reveal a 68.4% cart abandonment rate. Proposal: cross-sell checkout bundles for 'Technical Accessories' to capture an estimated recovery.";
-        aiData = {
-          abandonmentRate: "68.4%",
-          recoveryPotential: `$${Math.round(monthlyRevenue * 0.045).toLocaleString()}`,
-          bundleOption: "Tech Packs"
-        };
-      } else if (cleanText.includes("security") || cleanText.includes("isolated") || cleanText.includes("db")) {
-        aiResponse = "Security audit pass: Row-Level Security (RLS) is actively enforced. Client datasets are parsed asynchronously in isolated processes. Path traversal filters intercepted zero warning events.";
-        aiData = {
-          securityLevel: "AES-256 RLS",
-          vulnerabilities: "0",
-          sslCert: "Active"
-        };
-      } else if (cleanText.includes("n8n") || cleanText.includes("pipeline") || cleanText.includes("webhook")) {
-        aiResponse = "Platform automations: We detect active connection hooks to both hosted and self-hosted n8n configurations. Manual sync commands take average 48ms under full tenant load.";
-        aiData = {
-          webhookPing: "48ms",
-          triggersActive: "3 Active",
-          connector: "SAML SSO"
-        };
-      } else {
-        aiResponse = `I have grounding rules active for your monthly revenue segment ($${monthlyRevenue.toLocaleString()}). Predictive ML forecasts indicate stable ARR trajectories over Q3. Let's scale automated webhook triggers to secure cart leakages.`;
-        aiData = {
-          monthlySegment: `$${monthlyRevenue.toLocaleString()}`,
-          arrGrowthEst: "+14.2%",
-          riskAssessment: "Low Risk"
-        };
-      }
-
-      setChatHistory([...nextHistory, { sender: "ai" as const, text: aiResponse, data: aiData }]);
+    try {
+      const response = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userText, context: { monthlyRevenue } })
+      });
+      
+      if (!response.ok) throw new Error("API Network error");
+      
+      const data = await response.json();
+      setChatHistory([...nextHistory, { sender: "ai" as const, text: data.response, data: data.data }]);
+    } catch (error) {
+      setChatHistory([...nextHistory, { sender: "ai" as const, text: "Sorry, I encountered an error connecting to the backend." }]);
+    } finally {
       setIsTyping(false);
-    }, 1200);
+    }
   };
 
   const handleQuickPromptClick = (prompt: string) => {
@@ -338,6 +314,14 @@ export default function Home() {
   return (
     <div className={`min-h-screen relative transition-colors duration-300 ${isDarkMode ? "theme-dark bg-[#05070f] text-zinc-100" : "bg-[#f8fafc] text-slate-800"}`}>
       
+      {/* Custom Mouse Cursor Glow */}
+      {mounted && isDarkMode && (
+        <div 
+          className="cursor-glow hidden lg:block"
+          style={{ left: `${mousePosition.x}px`, top: `${mousePosition.y}px` }}
+        />
+      )}
+
       {/* Background grids and floating visual node connections */}
       <div className="absolute top-0 w-full h-[600px] bg-grid-glow opacity-30 z-0 pointer-events-none" />
       <div className="absolute top-[-200px] left-1/3 w-[600px] h-[600px] bg-cyan-500/10 rounded-full glow-blur animate-glow z-0 pointer-events-none" />
@@ -475,14 +459,14 @@ export default function Home() {
                 <div className="flex flex-col sm:flex-row gap-4 pt-2">
                   <Link 
                     href="/dashboard" 
-                    className="flex items-center justify-center gap-2 bg-cyan-500 hover:bg-cyan-600 text-zinc-950 px-6 py-3 rounded-lg font-bold text-sm sm:text-base transition-all hover:-translate-y-0.5 shadow-lg shadow-cyan-500/15 text-center"
+                    className="flex items-center justify-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-zinc-950 px-6 py-3 rounded-lg font-bold text-sm sm:text-base transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(0,242,254,0.4)] text-center"
                   >
                     Enter Control Tower <ArrowRight className="h-4 w-4" />
                   </Link>
                   <a 
                     href="#calculator" 
-                    className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-bold text-sm sm:text-base border transition-all ${
-                      isDarkMode ? "border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/80 text-zinc-300" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-750"
+                    className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-bold text-sm sm:text-base border transition-all hover:scale-105 ${
+                      isDarkMode ? "border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/80 hover:border-cyan-500/50 text-zinc-300" : "border-slate-200 bg-white hover:bg-slate-50 hover:border-indigo-500/50 text-slate-750"
                     }`}
                   >
                     Assess ROI Savings
@@ -512,7 +496,7 @@ export default function Home() {
                 <h1
                   className={`font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl leading-[1.08] tracking-tight ${
                     isDarkMode 
-                    ? "text-white bg-gradient-to-b from-white via-zinc-150 to-zinc-400 bg-clip-text text-transparent" 
+                    ? "text-white bg-gradient-to-r from-purple-400 via-white to-cyan-400 animate-text-shimmer bg-clip-text text-transparent" 
                     : "text-slate-900"
                   }`}
                 >
@@ -526,14 +510,14 @@ export default function Home() {
                 <div className="flex flex-col sm:flex-row gap-4 pt-2">
                   <a 
                     href="#cleaner-simulator" 
-                    className="flex items-center justify-center gap-2 bg-cyan-500 hover:bg-cyan-600 text-zinc-950 px-6 py-3 rounded-lg font-bold text-sm sm:text-base transition-all hover:-translate-y-0.5 shadow-lg shadow-cyan-500/15 text-center"
+                    className="flex items-center justify-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-zinc-950 px-6 py-3 rounded-lg font-bold text-sm sm:text-base transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(0,242,254,0.4)] text-center"
                   >
                     Simulate CSV Ingest <ArrowRight className="h-4 w-4" />
                   </a>
                   <Link 
                     href="/dashboard"
-                    className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-bold text-sm sm:text-base border transition-all ${
-                      isDarkMode ? "border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/80 text-zinc-300" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-750"
+                    className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-bold text-sm sm:text-base border transition-all hover:scale-105 ${
+                      isDarkMode ? "border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/80 hover:border-cyan-500/50 text-zinc-300" : "border-slate-200 bg-white hover:bg-slate-50 hover:border-indigo-500/50 text-slate-750"
                     }`}
                   >
                     View System Jobs
@@ -563,7 +547,7 @@ export default function Home() {
                 <h1
                   className={`font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl leading-[1.08] tracking-tight ${
                     isDarkMode 
-                    ? "text-white bg-gradient-to-b from-white via-zinc-150 to-zinc-400 bg-clip-text text-transparent" 
+                    ? "text-white bg-gradient-to-r from-emerald-400 via-white to-cyan-400 animate-text-shimmer bg-clip-text text-transparent" 
                     : "text-slate-900"
                   }`}
                 >
@@ -577,14 +561,14 @@ export default function Home() {
                 <div className="flex flex-col sm:flex-row gap-4 pt-2">
                   <Link 
                     href="/dashboard"
-                    className="flex items-center justify-center gap-2 bg-cyan-500 hover:bg-cyan-600 text-zinc-950 px-6 py-3 rounded-lg font-bold text-sm sm:text-base transition-all hover:-translate-y-0.5 shadow-lg shadow-cyan-500/15 text-center"
+                    className="flex items-center justify-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-zinc-950 px-6 py-3 rounded-lg font-bold text-sm sm:text-base transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(0,242,254,0.4)] text-center"
                   >
                     Configure Access Matrix <ArrowRight className="h-4 w-4" />
                   </Link>
                   <Link 
                     href="/login"
-                    className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-bold text-sm sm:text-base border transition-all ${
-                      isDarkMode ? "border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/80 text-zinc-300" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-750"
+                    className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-bold text-sm sm:text-base border transition-all hover:scale-105 ${
+                      isDarkMode ? "border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/80 hover:border-cyan-500/50 text-zinc-300" : "border-slate-200 bg-white hover:bg-slate-50 hover:border-indigo-500/50 text-slate-750"
                     }`}
                   >
                     Client Authentication
@@ -1284,41 +1268,48 @@ export default function Home() {
 
       {/* FAQs */}
       <section id="faq" className="max-w-4xl mx-auto px-6 py-20 z-10 relative">
-        <div className="text-center mb-16">
-          <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-            Frequently Asked Questions
-          </h2>
-        </div>
+        <motion.div
+          initial={{ y: 40, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="text-center mb-16">
+            <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+              Frequently Asked Questions
+            </h2>
+          </div>
 
-        <div className="flex flex-col gap-4 text-left">
-          {faqs.map((faq, idx) => (
-            <div key={idx} className={`border rounded-xl overflow-hidden transition-all ${isDarkMode ? "bg-zinc-900/30 border-zinc-800/50" : "bg-white border-slate-200"}`}>
-              <button 
-                onClick={() => setActiveFAQ(activeFAQ === idx ? null : idx)}
-                className="w-full flex items-center justify-between p-5 text-left font-medium hover:bg-cyan-500/5 transition-colors"
-              >
-                <span className="flex items-center gap-3 text-sm">
-                  <HelpCircle className="h-4.5 w-4.5 text-cyan-500 flex-shrink-0" />
-                  {faq.q}
-                </span>
-                <ChevronDown className={`h-4 w-4 text-zinc-400 transition-transform ${activeFAQ === idx ? "rotate-180" : ""}`} />
-              </button>
-              <AnimatePresence initial={false}>
-                {activeFAQ === idx && (
-                  <motion.div 
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.25 }}
-                    className={`px-5 pb-5 pt-1 text-sm border-t leading-relaxed ${isDarkMode ? "text-zinc-400 border-zinc-800/30" : "text-slate-650 border-slate-100"}`}
-                  >
-                    {faq.a}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ))}
-        </div>
+          <div className="flex flex-col gap-4 text-left">
+            {faqs.map((faq, idx) => (
+              <div key={idx} className={`border rounded-xl overflow-hidden transition-all ${isDarkMode ? "bg-zinc-900/30 border-zinc-800/50" : "bg-white border-slate-200"}`}>
+                <button 
+                  onClick={() => setActiveFAQ(activeFAQ === idx ? null : idx)}
+                  className="w-full flex items-center justify-between p-5 text-left font-medium hover:bg-cyan-500/5 transition-colors"
+                >
+                  <span className="flex items-center gap-3 text-sm">
+                    <HelpCircle className="h-4.5 w-4.5 text-cyan-500 flex-shrink-0" />
+                    {faq.q}
+                  </span>
+                  <ChevronDown className={`h-4 w-4 text-zinc-400 transition-transform ${activeFAQ === idx ? "rotate-180" : ""}`} />
+                </button>
+                <AnimatePresence initial={false}>
+                  {activeFAQ === idx && (
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className={`px-5 pb-5 pt-1 text-sm border-t leading-relaxed ${isDarkMode ? "text-zinc-400 border-zinc-800/30" : "text-slate-650 border-slate-100"}`}
+                    >
+                      {faq.a}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
+          </div>
+        </motion.div>
       </section>
 
       {/* Footer */}

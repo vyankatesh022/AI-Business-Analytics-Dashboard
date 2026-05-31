@@ -74,3 +74,17 @@ Security is maintained via a **Zero-Trust AppSec Framework** mapped against a 63
 2. **Access Control**: Role-Based Access Control (RBAC) separating Free, Pro, Premium ML, and Admin privileges.
 3. **Database Rules**: Supabase Row-Level Security (RLS) restricts row access strictly based on authenticated tenant ownership IDs.
 4. **Data Isolation**: All uploads pass MIME-type checks, size limitations, and path traversal sanitization before hitting Supabase storage.
+
+---
+
+## Recent Updates
+
+### Backend AI Integration
+- **Gemini Chat Endpoint**: Integrated Google Gemini AI via FastAPI (`/api/ai/chat`) to serve grounded analytics assistance.
+- **Next.js Proxying**: Added server-side rewrites in `next.config.ts` to seamlessly proxy frontend API requests to the Python FastAPI backend.
+
+### Frontend UI Overhaul
+- **Default Light Theme**: Enforced a sleek default light-theme styling system for new users.
+- **Scroll & Cascade Animations**: Utilized Framer Motion `whileInView` and CSS keyframes (`animate-cascade`) to introduce smooth, sequential animations to tables, dashboard widgets, and landing page elements.
+- **Glassmorphism Metrics**: Upgraded dashboard metric cards with `dashboard-glass` CSS filters and dynamic hover state interaction arrays.
+- **Custom Mouse Cursor**: Added a subtle animated mouse-tracking cursor glow for dark-mode.

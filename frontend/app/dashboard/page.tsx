@@ -154,7 +154,7 @@ const KeyboardShortcutsGuide = ({ isDarkMode, onClose }: { isDarkMode: boolean; 
 
 export default function Dashboard() {
   // Global States
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("overview");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [favorites, setFavorites] = useState<string[]>(["overview", "analytics"]);
@@ -368,38 +368,63 @@ export default function Dashboard() {
   };
 
   // Data Clean Audit Simulator
-  const simulateDataCleaning = () => {
+  const simulateDataCleaning = async () => {
     setIsProcessing(true);
-    setProcessingLogs([]);
+    setProcessingLogs([
+      "SecOps: Uploaded data securely transmitted to API...",
+      "Clean Engine: Initializing FastAPI backend pipeline..."
+    ]);
     setCleaningCompleted(false);
 
-    const logs = [
-      "SecOps: Triggering active path traversal protection audit... SECURE",
-      "SecOps: Intercepting tabular schema data (text/csv target)... PASSED",
-      "Clean Engine: Initiating full outlier filtration parameters...",
-      "Clean Engine: Dropped 14 duplicate rows and indexed columns.",
-      "Clean Engine: Imputed 6 null indicators with local cohort median metrics.",
-      "Grounding Engine: Compiling database rows as AI ground arrays...",
-      "Grounded ML: Analytical pipeline models successfully fitting."
-    ];
+    try {
+      // Create some mock payload data to clean representing uploaded file contents
+      const payload = [
+        { client: fileName || "Local Uploaded File", rev: 19800, churn: "1.4%", status: "Raw" },
+        { client: fileName || "Local Uploaded File", rev: 19800, churn: "1.4%", status: "Raw" }, // Duplicate
+        { client: "Null Data Inc", rev: null, churn: "0.0%", status: "Raw" } // Nulls
+      ];
 
-    let logIndex = 0;
-    const interval = setInterval(() => {
-      if (logIndex < logs.length) {
-        setProcessingLogs(prev => [...prev, logs[logIndex]]);
-        logIndex++;
-      } else {
-        clearInterval(interval);
-        setIsProcessing(false);
-        setCleaningCompleted(true);
-        triggerToast("Tabular dataset successfully clean-sanitized.");
-        // Add new item into data table
-        setTableData(prev => [
-          { id: `r-${Date.now()}`, date: "2026-05-30", client: fileName || "Local Uploaded File", rev: 19800, churn: "1.4%", status: "Sanitized" },
-          ...prev
-        ]);
-      }
-    }, 380);
+      setProcessingLogs(prev => [...prev, "API Request: POST /api/clean"]);
+      
+      const response = await fetch("/api/clean", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: payload })
+      });
+
+      if (!response.ok) throw new Error("API Network error");
+      
+      const data = await response.json();
+      
+      setProcessingLogs(prev => [
+        ...prev, 
+        `Backend Response: Dropped ${data.dropped_duplicates} duplicates.`,
+        `Backend Response: Imputed ${data.imputed_nulls} null records.`,
+        "Grounding Engine: Model data synchronized.",
+        "Grounded ML: Analytical pipeline successfully complete."
+      ]);
+
+      setCleaningCompleted(true);
+      triggerToast("Tabular dataset successfully clean-sanitized.");
+      
+      // Add the cleaned records to the data table
+      const newItems = data.cleaned_data.map((item: any, i: number) => ({
+        id: `r-api-${Date.now()}-${i}`,
+        date: new Date().toISOString().split("T")[0],
+        client: item.client,
+        rev: item.rev || 0,
+        churn: item.churn,
+        status: item.status
+      }));
+
+      setTableData(prev => [...newItems, ...prev]);
+
+    } catch (error) {
+      setProcessingLogs(prev => [...prev, `[ERROR] Failed to execute pipeline: ${error}`]);
+      triggerToast("Data cleaning pipeline failed.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -745,10 +770,10 @@ export default function Dashboard() {
 
                   if (widget.id === "kpis") {
                     return (
-                      <div key="kpis" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-fadeIn">
+                      <div key="kpis" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-cascade">
                         
                         {/* KPI 1 */}
-                        <div className="p-5 border rounded-2xl bg-zinc-950/40 border-zinc-800/80 flex flex-col justify-between h-28 hover:border-cyan-500 transition-colors">
+                        <div className="dashboard-glass dashboard-glass-hover rounded-2xl p-5 flex flex-col justify-between h-28">
                           <div className="flex justify-between items-start text-zinc-500 uppercase tracking-widest text-[9px] font-bold">
                             <span>Annual Recurring (ARR)</span>
                             <TrendingUp className="h-4 w-4 text-emerald-400" />
@@ -758,7 +783,7 @@ export default function Dashboard() {
                         </div>
 
                         {/* KPI 2 */}
-                        <div className="p-5 border rounded-2xl bg-zinc-950/40 border-zinc-800/80 flex flex-col justify-between h-28 hover:border-cyan-500 transition-colors">
+                        <div className="dashboard-glass dashboard-glass-hover rounded-2xl p-5 flex flex-col justify-between h-28" style={{ animationDelay: '100ms' }}>
                           <div className="flex justify-between items-start text-zinc-500 uppercase tracking-widest text-[9px] font-bold">
                             <span>Active Tenant Nodes</span>
                             <Users className="h-4 w-4 text-cyan-400" />
@@ -768,7 +793,7 @@ export default function Dashboard() {
                         </div>
 
                         {/* KPI 3 */}
-                        <div className="p-5 border rounded-2xl bg-zinc-950/40 border-zinc-800/80 flex flex-col justify-between h-28 hover:border-cyan-500 transition-colors">
+                        <div className="dashboard-glass dashboard-glass-hover rounded-2xl p-5 flex flex-col justify-between h-28" style={{ animationDelay: '200ms' }}>
                           <div className="flex justify-between items-start text-zinc-500 uppercase tracking-widest text-[9px] font-bold">
                             <span>Net Revenue Retention</span>
                             <ShieldCheck className="h-4 w-4 text-emerald-400" />
@@ -793,7 +818,7 @@ export default function Dashboard() {
 
                   if (widget.id === "revenueChart") {
                     return (
-                      <div key="revenueChart" className="p-6 border rounded-2xl bg-[#0d111d]/50 border-zinc-800/80">
+                      <div key="revenueChart" className="p-6 border rounded-2xl bg-[#0d111d]/50 border-zinc-800/80 animate-cascade" style={{ animationDelay: '300ms' }}>
                         <div className="flex justify-between items-center border-b border-zinc-850 pb-4 mb-4">
                           <div>
                             <span className="text-[9px] uppercase tracking-widest font-bold text-zinc-500">Telemetry Engine Spline</span>
@@ -868,7 +893,7 @@ export default function Dashboard() {
 
                   if (widget.id === "retentionGauges") {
                     return (
-                      <div key="retentionGauges" className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div key="retentionGauges" className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-cascade" style={{ animationDelay: '400ms' }}>
                         
                         {/* Interactive Geographic Map Widget */}
                         <div className="p-6 border rounded-2xl bg-zinc-950/40 border-zinc-800/80">
@@ -922,7 +947,7 @@ export default function Dashboard() {
 
                   if (widget.id === "summaryWidgets") {
                     return (
-                      <div key="summaryWidgets" className="p-6 border rounded-2xl bg-zinc-950/40 border-zinc-800/80">
+                      <div key="summaryWidgets" className="p-6 border rounded-2xl bg-zinc-950/40 border-zinc-800/80 animate-cascade" style={{ animationDelay: '500ms' }}>
                         <div className="flex justify-between items-center mb-3">
                           <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Active Anomalies & Audit Records</h4>
                           <span className="text-[10px] px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20 font-bold">Stable</span>
@@ -1494,8 +1519,8 @@ export default function Dashboard() {
                           }
                           return 0;
                         })
-                        .map(row => (
-                          <tr key={row.id} className="hover:bg-zinc-900/10 transition-colors">
+                        .map((row, index) => (
+                          <tr key={row.id} className="hover:bg-zinc-900/10 transition-colors animate-cascade" style={{ animationDelay: `${index * 50}ms` }}>
                             <td className="py-3 px-3">
                               <input 
                                 type="checkbox"
