@@ -1,6 +1,6 @@
 import jwt
 from fastapi import HTTPException, status
-from config.settings import settings
+from backend.config.settings import settings
 
 def verify_access_token(token: str) -> dict:
     """
