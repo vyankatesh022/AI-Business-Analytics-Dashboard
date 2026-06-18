@@ -33,7 +33,7 @@ export function Sidebar() {
   const { isDarkMode, favorites } = useDashboardStore();
   const { hasRole } = useAuthStore();
 
-  const visibleItems = NAV_ITEMS.filter(item => hasRole(item.roles as any));
+  const visibleItems = NAV_ITEMS.filter(item => hasRole(item.roles as unknown as import("@/store/useAuthStore").Role[]));
 
   return (
     <aside className={`w-64 border-r shrink-0 hidden md:flex flex-col justify-between z-10 transition-colors ${

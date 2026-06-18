@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Activity, Send, Bot, User, AlertTriangle, Sparkles, Zap, Lock } from "lucide-react";
+import { Activity, Send, Bot, User, AlertTriangle, Sparkles, Zap } from "lucide-react";
 import { PageContainer } from "@/components/dashboard/PageContainer";
 import { sendChatMessage, ChatMessage } from "@/services/aiApi";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useAuthStore, Role } from "@/store/useAuthStore";
 
 const AVAILABLE_MODELS = [
   { id: "gemini-1.5-flash", name: "Gemini 1.5 Flash", tier: "Free", icon: Zap },
@@ -22,7 +22,7 @@ export default function AIInsightsPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const { hasRole } = useAuthStore();
-  const isProUser = hasRole(["Pro", "Admin", "Super Admin"]); // Backend logic expects Pro/Admin
+  const isProUser = hasRole(["Super Admin"] as Role[]); // Backend logic expects Pro/Admin
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -45,8 +45,8 @@ export default function AIInsightsPage() {
     try {
       const response = await sendChatMessage(userMessage, selectedModel);
       setMessages(prev => [...prev, { role: "assistant", content: response.response }]);
-    } catch (err: any) {
-      setError(err.message || "An error occurred while communicating with the AI.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An error occurred while communicating with the AI.");
       // Optional: remove the user message if it failed, or keep it and show error.
       // We will keep it and just show the error above the input.
     } finally {

@@ -4,19 +4,14 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { 
+import {
   TrendingUp, 
   Sparkles, 
   ShieldCheck, 
   ArrowRight, 
-  FileSpreadsheet, 
-  BrainCircuit, 
-  BarChart3, 
   Bot, 
   Check, 
-  HelpCircle,
   Activity,
-  ChevronDown,
   Sun,
   Moon,
   Lock,
@@ -235,24 +230,6 @@ export default function Home() {
     );
   };
 
-  // Entrance variants
-  const fadeInUp = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 0.6, ease: "easeOut" as const }
-    }
-  };
-
-  const containerVariants = {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: 0.15
-      }
-    }
-  };
 
   if (!mounted) {
     return (

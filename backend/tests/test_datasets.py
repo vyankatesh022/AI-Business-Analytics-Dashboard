@@ -13,7 +13,11 @@ from backend.auth.dependencies import get_current_user
 async def mock_get_current_user():
     return {"id": "test-user-id", "email": "test@example.com", "role": "Pro"}
 
-app.dependency_overrides[get_current_user] = mock_get_current_user
+@pytest.fixture(autouse=True)
+def override_auth():
+    app.dependency_overrides[get_current_user] = mock_get_current_user
+    yield
+    app.dependency_overrides.clear()
 
 @pytest.fixture
 def mock_dataset_service():
@@ -87,3 +91,37 @@ def test_rename_dataset(mock_dataset_service):
 def test_upload_missing_file():
     response = client.post("/api/datasets/upload")
     assert response.status_code == 422 # Unprocessable Entity due to missing 'file' field
+
+@patch("backend.api.datasets.httpx.AsyncClient")
+def test_import_dataset_success(mock_httpx, mock_dataset_service, mock_validator):
+    # Mock httpx response
+    mock_client = MagicMock()
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.content = b"col1,col2\n1,2"
+    mock_response.headers = {"content-type": "text/csv"}
+    
+    # Mock the async context manager method __aenter__
+    mock_httpx.return_value.__aenter__.return_value = mock_client
+    
+    # Mock client.get which is async
+    async def mock_get(*args, **kwargs):
+        return mock_response
+    mock_client.get = mock_get
+    
+    mock_dataset_service["process"].return_value = {
+        "id": "ds-import-123",
+        "original_filename": "custom_name.csv",
+        "status": "processed"
+    }
+    
+    response = client.post(
+        "/api/datasets/import", 
+        json={"url": "https://example.com/imported.csv", "filename": "custom_name.csv"}
+    )
+    
+    assert response.status_code == 200
+    assert response.json()["id"] == "ds-import-123"
+    mock_validator.assert_called_once()
+    mock_dataset_service["process"].assert_called_once()
+

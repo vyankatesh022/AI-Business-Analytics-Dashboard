@@ -39,7 +39,7 @@ export async function updateSession(request: NextRequest) {
       if (mockCookie && mockCookie.value) {
         user = JSON.parse(mockCookie.value).user;
       }
-    } catch (e) {
+    } catch {
       console.error("Failed to parse mock auth cookie");
     }
   }

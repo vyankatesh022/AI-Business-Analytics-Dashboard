@@ -1,124 +1,258 @@
 "use client";
 
 import React, { useState } from "react";
-import { Database, FileSpreadsheet, Trash2, Edit2, Loader2 } from "lucide-react";
+import { Database, FileSpreadsheet, Activity, Zap } from "lucide-react";
 import { PageContainer } from "@/components/dashboard/PageContainer";
-import DatasetUploader from "@/components/datasets/DatasetUploader";
-import DatasetPreview from "@/components/datasets/DatasetPreview";
+import UploadView from "@/components/datasets/UploadView";
+import ConnectView from "@/components/datasets/ConnectView";
+import DataRepository from "@/components/datasets/DataRepository";
+import DatasetDetailsView from "@/components/datasets/DatasetDetailsView";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchDatasets, deleteDataset, Dataset } from "@/services/datasetApi";
+import { fetchDatasets, deleteDataset, uploadDataset, Dataset, fetchFolders, createFolder } from "@/services/datasetApi";
 import { filesize } from "filesize";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useToast } from "@/components/ui/Toast";
 
 export default function DatasetsPage() {
   const queryClient = useQueryClient();
-  const [selectedDataset, setSelectedDataset] = useState<Dataset | null>(null);
+  const { toast } = useToast();
 
-  const { data: datasets, isLoading } = useQuery({
+  const [selectedDataset, setSelectedDataset] = useState<Dataset | null>(null);
+  const [activeWorkspace, setActiveWorkspace] = useState<'repository' | 'upload' | 'connect'>('repository');
+  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
+
+  const { data: datasets, isLoading, refetch } = useQuery({
     queryKey: ["datasets"],
     queryFn: fetchDatasets,
   });
 
+  const { data: folders, refetch: refetchFolders } = useQuery({
+    queryKey: ["folders"],
+    queryFn: fetchFolders,
+  });
+
+  // 2. Mutations
   const deleteMutation = useMutation({
     mutationFn: deleteDataset,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["datasets"] });
-      if (selectedDataset) setSelectedDataset(null);
+      setSelectedDataset(null);
     },
   });
 
-  const handleUploadComplete = (dataset: Dataset) => {
-    queryClient.invalidateQueries({ queryKey: ["datasets"] });
-    setSelectedDataset(dataset);
-  };
+  const uploadMutation = useMutation({
+    mutationFn: (file: File) => uploadDataset(file, currentFolderId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["datasets"] });
+      setActiveWorkspace('repository');
+    },
+  });
 
-  const handleDelete = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    if (confirm("Are you sure you want to delete this dataset?")) {
+  const createFolderMutation = useMutation({
+    mutationFn: ({ name, parentId }: { name: string; parentId?: string | null }) => createFolder(name, parentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["folders"] });
+      toast({ type: 'success', title: 'Folder created', message: 'The folder was created successfully.' });
+    },
+    onError: (error: any) => {
+      toast({ type: 'error', title: 'Failed to create folder', message: error.message || 'An error occurred.' });
+    }
+  });
+
+  // 3. Handlers
+  const handleDelete = (id: string) => {
+    if (confirm("Are you sure you want to delete this dataset? This action is permanent.")) {
       deleteMutation.mutate(id);
     }
   };
 
+  const handleImportComplete = (dataset: Dataset) => {
+    queryClient.setQueryData(["datasets"], (oldData: Dataset[] | undefined) => {
+      if (!oldData) return [dataset];
+      return [dataset, ...oldData];
+    });
+    queryClient.invalidateQueries({ queryKey: ["datasets"] });
+    setActiveWorkspace('repository');
+  };
+
+  const handleDatasetUpdated = (updatedDataset: Dataset) => {
+    setSelectedDataset(updatedDataset);
+    queryClient.invalidateQueries({ queryKey: ["datasets"] });
+  };
+
+  const handleLocalUploadClick = () => {
+    setActiveWorkspace('upload');
+  };
+
+  const handleFileChange = async (file: File) => {
+    if (file) {
+      uploadMutation.mutate(file);
+    }
+  };
+
+  const handleRemoteConnectionClick = () => {
+    setActiveWorkspace('connect');
+  };
+
+  const handleCreateFolder = (name: string, parentId?: string | null) => {
+    createFolderMutation.mutate({ name, parentId });
+  };
+
   return (
     <PageContainer>
-      <div className="space-y-6 flex flex-col h-full">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2 text-white">
-              Datasets <Database className="h-5 w-5 text-cyan-400" />
-            </h1>
-            <p className="text-xs text-zinc-400 mt-1">Upload, manage, and preview your enterprise datasets securely.</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-[600px]">
-          {/* Left Column: Uploader & List */}
-          <div className="col-span-1 flex flex-col gap-6">
-            {/* Uploader Component */}
-            <div className="bg-zinc-950/40 border border-zinc-800/60 rounded-2xl p-4">
-              <DatasetUploader onUploadComplete={handleUploadComplete} />
+      <div className="space-y-8 flex flex-col h-full w-full max-w-7xl mx-auto pb-10">
+        
+        {/* SECTION 1: HEADER & METRICS */}
+        <section>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div>
+              <h1 className="text-2xl font-black tracking-tight text-[var(--text-primary)] flex items-center gap-2">
+                DATA INGESTION COMMAND CENTER
+              </h1>
+              <p className="text-sm text-[var(--text-secondary)] mt-1">
+                Index, organize, ingest, and monitor datasets from local and remote sources.
+              </p>
             </div>
+          </div>
 
-            {/* Datasets List */}
-            <div className="bg-zinc-950/40 border border-zinc-800/60 rounded-2xl p-4 flex-1 overflow-hidden flex flex-col">
-              <h3 className="text-sm font-semibold text-zinc-300 mb-4 px-2">Your Datasets</h3>
-              
-              <div className="flex-1 overflow-y-auto pr-2 space-y-2 custom-scrollbar">
-                {isLoading ? (
-                  <div className="flex items-center justify-center h-32">
-                    <Loader2 className="w-6 h-6 text-cyan-500 animate-spin" />
-                  </div>
-                ) : datasets && datasets.length > 0 ? (
-                  datasets.map((ds: Dataset) => (
-                    <motion.div
-                      key={ds.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      onClick={() => setSelectedDataset(ds)}
-                      className={`group cursor-pointer p-3 rounded-xl border transition-all ${
-                        selectedDataset?.id === ds.id 
-                          ? 'bg-cyan-500/10 border-cyan-500/30' 
-                          : 'bg-zinc-900/50 border-zinc-800 hover:bg-zinc-800/80 hover:border-zinc-700'
-                      }`}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-3 overflow-hidden">
-                          <div className={`p-2 rounded-lg ${selectedDataset?.id === ds.id ? 'bg-cyan-500/20' : 'bg-zinc-800'}`}>
-                            <FileSpreadsheet className={`w-4 h-4 ${selectedDataset?.id === ds.id ? 'text-cyan-400' : 'text-zinc-400'}`} />
-                          </div>
-                          <div className="overflow-hidden">
-                            <p className="text-sm font-medium text-zinc-200 truncate" title={ds.original_filename}>
-                              {ds.original_filename}
-                            </p>
-                            <p className="text-xs text-zinc-500 mt-0.5">
-                              {filesize(ds.size_bytes).toString()} • {ds.row_count} rows
-                            </p>
-                          </div>
-                        </div>
-                        <button 
-                          onClick={(e) => handleDelete(e, ds.id)}
-                          disabled={deleteMutation.isPending}
-                          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md hover:bg-red-500/20 text-zinc-500 hover:text-red-400 transition-all"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))
-                ) : (
-                  <div className="text-center py-8 px-4 text-zinc-500 text-sm">
-                    No datasets found. Upload one to get started.
-                  </div>
-                )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-[var(--card-color)] border border-[var(--border-color)] rounded-xl p-4 shadow-sm flex flex-col justify-between">
+              <div className="flex items-center gap-2 mb-2 text-[var(--text-secondary)]">
+                <Database className="w-4 h-4" />
+                <span className="text-xs font-semibold uppercase tracking-wider">Indexed Files</span>
               </div>
+              <h4 className="text-2xl font-bold text-[var(--text-primary)] font-mono">{datasets?.length || 0}</h4>
+            </div>
+
+            <div className="bg-[var(--card-color)] border border-[var(--border-color)] rounded-xl p-4 shadow-sm flex flex-col justify-between">
+              <div className="flex items-center gap-2 mb-2 text-[var(--text-secondary)]">
+                <FileSpreadsheet className="w-4 h-4" />
+                <span className="text-xs font-semibold uppercase tracking-wider">Storage Footprint</span>
+              </div>
+              <h4 className="text-2xl font-bold text-[var(--text-primary)] font-mono">
+                {filesize(datasets?.reduce((acc, d) => acc + d.size_bytes, 0) || 0).toString()}
+              </h4>
+            </div>
+
+            <div className="bg-[var(--card-color)] border border-[var(--border-color)] rounded-xl p-4 shadow-sm flex flex-col justify-between">
+              <div className="flex items-center gap-2 mb-2 text-[var(--text-secondary)]">
+                <Activity className="w-4 h-4" />
+                <span className="text-xs font-semibold uppercase tracking-wider">Aggregated Rows</span>
+              </div>
+              <h4 className="text-2xl font-bold text-[var(--text-primary)] font-mono">
+                {(datasets?.reduce((acc, d) => acc + d.row_count, 0) || 0).toLocaleString()}
+              </h4>
+            </div>
+
+            <div className="bg-[var(--card-color)] border border-[var(--border-color)] rounded-xl p-4 shadow-sm flex flex-col justify-between">
+              <div className="flex items-center gap-2 mb-2 text-[var(--text-secondary)]">
+                <Zap className="w-4 h-4" />
+                <span className="text-xs font-semibold uppercase tracking-wider">Ingestion SLA</span>
+              </div>
+              <h4 className="text-2xl font-bold text-[var(--text-primary)] font-mono flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                99.99%
+              </h4>
             </div>
           </div>
+        </section>
 
-          {/* Right Column: Preview */}
-          <div className="col-span-1 lg:col-span-2 flex flex-col h-full bg-zinc-950/40 border border-zinc-800/60 rounded-2xl overflow-hidden">
-            <DatasetPreview dataset={selectedDataset} />
-          </div>
-        </div>
+        {/* Dynamic Content Area */}
+        <AnimatePresence mode="wait">
+          {selectedDataset ? (
+            /* DATASET DETAILS VIEW */
+            <motion.section
+              key="dataset-details"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="w-full flex-1 min-w-0 flex flex-col h-full"
+            >
+              <DatasetDetailsView
+                dataset={selectedDataset}
+                onDatasetUpdated={handleDatasetUpdated}
+                onBack={() => setSelectedDataset(null)}
+              />
+            </motion.section>
+          ) : (
+            <motion.div
+              key="main-view"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="space-y-8 flex-1 flex flex-col"
+            >
+              {/* WORKSPACE VIEW MANAGER */}
+              <AnimatePresence mode="wait">
+                {activeWorkspace === 'repository' && (
+                  <motion.section
+                    key="repository"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex-1 min-h-[600px]"
+                  >
+                    <DataRepository 
+                      datasets={datasets || []}
+                      folders={folders || []}
+                      isLoading={isLoading}
+                      onRefresh={() => { refetch(); refetchFolders(); }}
+                      onUploadClick={handleLocalUploadClick}
+                      onConnectClick={handleRemoteConnectionClick}
+                      onDeleteDataset={handleDelete}
+                      onSelectDataset={setSelectedDataset}
+                      onCreateFolder={handleCreateFolder}
+                      currentFolderId={currentFolderId}
+                      onFolderChange={setCurrentFolderId}
+                    />
+                  </motion.section>
+                )}
+
+                {activeWorkspace === 'upload' && (
+                  <motion.section
+                    key="upload"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex-1 min-h-[600px]"
+                  >
+                    <UploadView 
+                      onBack={() => setActiveWorkspace('repository')}
+                      onUploadSuccess={() => {
+                        queryClient.invalidateQueries({ queryKey: ["datasets"] });
+                        setActiveWorkspace('repository');
+                      }}
+                      currentFolder={folders?.find(f => f.id === currentFolderId)}
+                    />
+                  </motion.section>
+                )}
+
+                {activeWorkspace === 'connect' && (
+                  <motion.section
+                    key="connect"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex-1 min-h-[600px]"
+                  >
+                    <ConnectView 
+                      onBack={() => setActiveWorkspace('repository')}
+                      onImportComplete={handleImportComplete}
+                      folders={folders || []}
+                      currentFolderId={currentFolderId}
+                    />
+                  </motion.section>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </PageContainer>
   );

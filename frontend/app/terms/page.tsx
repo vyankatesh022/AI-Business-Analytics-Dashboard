@@ -9,8 +9,9 @@ export default function TermsOfService() {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    setTimeout(() => setMounted(true), 0);
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsDarkMode(mediaQuery.matches);
     const handler = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
     mediaQuery.addEventListener("change", handler);

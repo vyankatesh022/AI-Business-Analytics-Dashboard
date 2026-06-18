@@ -3,14 +3,14 @@ export interface ChatMessage {
   content: string;
 }
 
-export interface ChatResponse {
+interface ChatResponse {
   response: string;
-  data: any;
+  data?: unknown;
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
-export const sendChatMessage = async (message: string, model: string = "gemini-1.5-flash", context?: any): Promise<ChatResponse> => {
+export const sendChatMessage = async (message: string, model: string = "gemini-1.5-flash", context?: unknown): Promise<ChatResponse> => {
   const res = await fetch(`${API_BASE_URL}/ai/chat`, {
     method: 'POST',
     headers: {

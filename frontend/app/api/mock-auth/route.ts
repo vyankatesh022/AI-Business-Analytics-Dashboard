@@ -24,8 +24,8 @@ export async function POST(request: Request) {
     } else if (action === 'signup') {
       try {
         user = createMockUser(email, password);
-      } catch (err: any) {
-        return NextResponse.json({ error: err.message }, { status: 400 });
+      } catch (err: unknown) {
+        return NextResponse.json({ error: err instanceof Error ? err.message : "Unknown error" }, { status: 400 });
       }
     } else {
       return NextResponse.json({ error: "Invalid action" }, { status: 400 });
@@ -50,9 +50,10 @@ export async function POST(request: Request) {
     });
 
     // Remove password before sending to client
-    const { password: _, ...safeUser } = user;
+    const safeUser = { ...user };
+    delete (safeUser as { password?: string }).password;
     return NextResponse.json({ success: true, user: safeUser });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

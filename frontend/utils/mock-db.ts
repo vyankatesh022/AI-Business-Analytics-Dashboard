@@ -23,7 +23,7 @@ const ensureDevMode = () => {
   }
 };
 
-export const getMockUsers = (): MockUser[] => {
+const getMockUsers = (): MockUser[] => {
   ensureDevMode();
   const dbPath = getDbPath();
   if (!fs.existsSync(dbPath)) {
@@ -32,12 +32,12 @@ export const getMockUsers = (): MockUser[] => {
   try {
     const data = fs.readFileSync(dbPath, 'utf8');
     return JSON.parse(data);
-  } catch (error) {
+  } catch {
     return [];
   }
 };
 
-export const saveMockUsers = (users: MockUser[]) => {
+const saveMockUsers = (users: MockUser[]) => {
   ensureDevMode();
   const dbPath = getDbPath();
   fs.writeFileSync(dbPath, JSON.stringify(users, null, 2));
