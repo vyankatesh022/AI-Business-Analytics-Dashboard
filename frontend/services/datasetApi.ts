@@ -186,3 +186,40 @@ export const createFolder = async (name: string, parentId?: string | null): Prom
   }
   return res.json();
 };
+
+export const renameFolder = async (folderId: string, name: string): Promise<FolderNode> => {
+  const res = await fetch(`${API_BASE_URL}/datasets/folders/${folderId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to rename folder');
+  }
+  return res.json();
+};
+
+export const deleteFolder = async (folderId: string): Promise<void> => {
+  const res = await fetch(`${API_BASE_URL}/datasets/folders/${folderId}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to delete folder');
+  }
+};
+
+export const moveDataset = async (datasetId: string, folderId: string | null): Promise<Dataset> => {
+  const res = await fetch(`${API_BASE_URL}/datasets/${datasetId}/move`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ folder_id: folderId })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to move dataset');
+  }
+  return res.json();
+};
+

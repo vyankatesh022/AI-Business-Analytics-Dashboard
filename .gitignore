@@ -91,5 +91,6 @@ Thumbs.db
 # Local Uploads / Datasets
 uploads/
 temp/
-datasets/
+/datasets/
+/dataset/
 local-datasets.json

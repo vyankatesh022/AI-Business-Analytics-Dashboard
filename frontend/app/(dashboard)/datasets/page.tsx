@@ -8,7 +8,7 @@ import ConnectView from "@/components/datasets/ConnectView";
 import DataRepository from "@/components/datasets/DataRepository";
 import DatasetDetailsView from "@/components/datasets/DatasetDetailsView";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchDatasets, deleteDataset, uploadDataset, Dataset, fetchFolders, createFolder } from "@/services/datasetApi";
+import { fetchDatasets, deleteDataset, uploadDataset, Dataset, fetchFolders, createFolder, renameFolder, deleteFolder, moveDataset, renameDataset } from "@/services/datasetApi";
 import { filesize } from "filesize";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";
@@ -21,15 +21,17 @@ export default function DatasetsPage() {
   const [activeWorkspace, setActiveWorkspace] = useState<'repository' | 'upload' | 'connect'>('repository');
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
 
-  const { data: datasets, isLoading, refetch } = useQuery({
+  const { data: datasets, isLoading: isDatasetsLoading, isFetching: isDatasetsFetching, refetch: refetchDatasets } = useQuery({
     queryKey: ["datasets"],
     queryFn: fetchDatasets,
   });
 
-  const { data: folders, refetch: refetchFolders } = useQuery({
+  const { data: folders, isFetching: isFoldersFetching, refetch: refetchFolders } = useQuery({
     queryKey: ["folders"],
     queryFn: fetchFolders,
   });
+
+  const isLoading = isDatasetsLoading || isDatasetsFetching || isFoldersFetching;
 
   // 2. Mutations
   const deleteMutation = useMutation({
@@ -56,6 +58,51 @@ export default function DatasetsPage() {
     },
     onError: (error: any) => {
       toast({ type: 'error', title: 'Failed to create folder', message: error.message || 'An error occurred.' });
+    }
+  });
+
+  const renameFolderMutation = useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) => renameFolder(id, name),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["folders"] });
+      toast({ type: 'success', title: 'Folder renamed', message: 'The folder has been renamed successfully.' });
+    },
+    onError: (error: any) => {
+      toast({ type: 'error', title: 'Failed to rename folder', message: error.message || 'An error occurred.' });
+    }
+  });
+
+  const deleteFolderMutation = useMutation({
+    mutationFn: deleteFolder,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["folders"] });
+      queryClient.invalidateQueries({ queryKey: ["datasets"] });
+      toast({ type: 'success', title: 'Folder deleted', message: 'The folder was deleted successfully.' });
+    },
+    onError: (error: any) => {
+      toast({ type: 'error', title: 'Failed to delete folder', message: error.message || 'An error occurred.' });
+    }
+  });
+
+  const renameDatasetMutation = useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) => renameDataset(id, name),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["datasets"] });
+      toast({ type: 'success', title: 'Dataset renamed', message: 'The dataset has been renamed successfully.' });
+    },
+    onError: (error: any) => {
+      toast({ type: 'error', title: 'Failed to rename dataset', message: error.message || 'An error occurred.' });
+    }
+  });
+
+  const moveDatasetMutation = useMutation({
+    mutationFn: ({ id, folderId }: { id: string; folderId: string | null }) => moveDataset(id, folderId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["datasets"] });
+      toast({ type: 'success', title: 'Dataset moved', message: 'The dataset has been moved successfully.' });
+    },
+    onError: (error: any) => {
+      toast({ type: 'error', title: 'Failed to move dataset', message: error.message || 'An error occurred.' });
     }
   });
 
@@ -96,6 +143,28 @@ export default function DatasetsPage() {
 
   const handleCreateFolder = (name: string, parentId?: string | null) => {
     createFolderMutation.mutate({ name, parentId });
+  };
+
+  const handleRenameFolder = (id: string, name: string) => {
+    renameFolderMutation.mutate({ id, name });
+  };
+
+  const handleDeleteFolder = (id: string) => {
+    if (confirm("Are you sure you want to delete this folder? Nested folders and datasets will be moved to the parent directory.")) {
+      deleteFolderMutation.mutate(id);
+    }
+  };
+
+  const handleRenameDataset = (id: string, name: string) => {
+    renameDatasetMutation.mutate({ id, name });
+  };
+
+  const handleMoveItem = (itemId: string, type: 'dataset' | 'folder', targetFolderId: string | null) => {
+    if (type === 'dataset') {
+      moveDatasetMutation.mutate({ id: itemId, folderId: targetFolderId });
+    } else {
+      toast({ type: 'error', title: 'Action unsupported', message: 'Moving folders is not currently supported.' });
+    }
   };
 
   return (
@@ -200,12 +269,16 @@ export default function DatasetsPage() {
                       datasets={datasets || []}
                       folders={folders || []}
                       isLoading={isLoading}
-                      onRefresh={() => { refetch(); refetchFolders(); }}
+                      onRefresh={() => { refetchDatasets(); refetchFolders(); }}
                       onUploadClick={handleLocalUploadClick}
                       onConnectClick={handleRemoteConnectionClick}
                       onDeleteDataset={handleDelete}
                       onSelectDataset={setSelectedDataset}
                       onCreateFolder={handleCreateFolder}
+                      onRenameFolder={handleRenameFolder}
+                      onDeleteFolder={handleDeleteFolder}
+                      onRenameDataset={handleRenameDataset}
+                      onMoveItem={handleMoveItem}
                       currentFolderId={currentFolderId}
                       onFolderChange={setCurrentFolderId}
                     />

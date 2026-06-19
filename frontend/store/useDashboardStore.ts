@@ -12,7 +12,7 @@ interface DashboardState {
 }
 
 export const useDashboardStore = create<DashboardState>((set) => ({
-  isDarkMode: true, // Start in dark mode to match theme-dark preference
+  isDarkMode: false, // Start in light mode by default
   searchQuery: '',
   isSidebarCollapsed: false,
   favorites: ['dashboard', 'analytics'],

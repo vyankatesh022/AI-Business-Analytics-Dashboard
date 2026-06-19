@@ -3,13 +3,13 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  LayoutGrid, 
-  Database, 
-  BarChart3, 
-  Activity, 
-  FileSpreadsheet, 
-  CreditCard, 
+import {
+  LayoutGrid,
+  Database,
+  BarChart3,
+  Activity,
+  FileSpreadsheet,
+  CreditCard,
   Settings,
   TrendingUp,
   Bookmark,
@@ -36,9 +36,8 @@ export function Sidebar() {
   const visibleItems = NAV_ITEMS.filter(item => hasRole(item.roles as unknown as import("@/store/useAuthStore").Role[]));
 
   return (
-    <aside className={`w-64 border-r shrink-0 hidden md:flex flex-col justify-between z-10 transition-colors ${
-      isDarkMode ? "bg-[#0b0f19]/80 border-zinc-800/80" : "bg-white border-slate-200"
-    }`}>
+    <aside className={`w-64 border-r shrink-0 hidden md:flex flex-col justify-between z-10 transition-colors ${isDarkMode ? "bg-[#0b0f19]/80 border-zinc-800/80" : "bg-white border-slate-200"
+      }`}>
       <div className="p-5">
         <div className="flex items-center gap-2 mb-6">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-500">
@@ -60,9 +59,8 @@ export function Sidebar() {
                 <Link
                   key={f}
                   href={matchedItem.href}
-                  className={`text-[9px] px-2 py-0.5 rounded border capitalize flex items-center gap-0.5 ${
-                    isDarkMode ? "bg-zinc-900/60 border-zinc-800 text-cyan-400 hover:border-zinc-700" : "bg-slate-100 border-slate-200 text-indigo-600"
-                  }`}
+                  className={`text-[9px] px-2 py-0.5 rounded border capitalize flex items-center gap-0.5 ${isDarkMode ? "bg-zinc-900/60 border-zinc-800 text-cyan-400 hover:border-zinc-700" : "bg-slate-100 border-slate-200 text-indigo-600"
+                    }`}
                 >
                   <Bookmark className="h-2.5 w-2.5 fill-cyan-400" />
                   {matchedItem.name}
@@ -82,11 +80,10 @@ export function Sidebar() {
               <Link
                 key={tab.id}
                 href={tab.href}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-                  isActive
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold transition-all ${isActive
                     ? "bg-cyan-500/10 text-cyan-500 border border-cyan-500/10"
                     : isDarkMode ? "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/40" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-                }`}
+                  }`}
               >
                 <span className="flex items-center gap-2">
                   <Icon className="h-4 w-4" />
@@ -100,11 +97,10 @@ export function Sidebar() {
       </div>
 
       <div className="p-4 border-t border-zinc-800/40 text-xs">
-        <button 
-          onClick={() => {}}
-          className={`w-full p-2.5 rounded-lg border text-center font-mono flex items-center justify-center gap-1.5 transition-colors ${
-            isDarkMode ? "border-zinc-850 bg-zinc-900/20 text-zinc-400 hover:text-white" : "border-slate-200 bg-white text-slate-650"
-          }`}
+        <button
+          onClick={() => { }}
+          className={`w-full p-2.5 rounded-lg border text-center font-mono flex items-center justify-center gap-1.5 transition-colors ${isDarkMode ? "border-zinc-850 bg-zinc-900/20 text-zinc-400 hover:text-white" : "border-slate-200 bg-white text-slate-650"
+            }`}
         >
           <Sliders className="h-3.5 w-3.5" />
           <span>Shortcuts Guide [Alt+H]</span>

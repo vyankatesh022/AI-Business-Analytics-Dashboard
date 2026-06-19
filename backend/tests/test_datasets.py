@@ -92,22 +92,26 @@ def test_upload_missing_file():
     response = client.post("/api/datasets/upload")
     assert response.status_code == 422 # Unprocessable Entity due to missing 'file' field
 
-@patch("backend.api.datasets.httpx.AsyncClient")
+@patch("backend.services.ingestion_service.httpx.AsyncClient")
 def test_import_dataset_success(mock_httpx, mock_dataset_service, mock_validator):
-    # Mock httpx response
+    # Mock httpx response using MockStreamContext
     mock_client = MagicMock()
-    mock_response = MagicMock()
-    mock_response.status_code = 200
-    mock_response.content = b"col1,col2\n1,2"
-    mock_response.headers = {"content-type": "text/csv"}
     
+    class MockStreamContext:
+        def __init__(self, content=b"col1,col2\n1,2"):
+            self.content = content
+            self.status_code = 200
+        async def __aenter__(self):
+            return self
+        async def __aexit__(self, exc_type, exc_val, exc_tb):
+            pass
+        async def aiter_bytes(self):
+            yield self.content
+
     # Mock the async context manager method __aenter__
     mock_httpx.return_value.__aenter__.return_value = mock_client
     
-    # Mock client.get which is async
-    async def mock_get(*args, **kwargs):
-        return mock_response
-    mock_client.get = mock_get
+    mock_client.stream.return_value = MockStreamContext(b"col1,col2\n1,2")
     
     mock_dataset_service["process"].return_value = {
         "id": "ds-import-123",
