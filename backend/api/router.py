@@ -16,6 +16,13 @@ from backend.api.eda import eda_router
 api_router.include_router(eda_router, prefix="/datasets", tags=["EDA Analytics"])
 from backend.api.analytics import analytics_router
 api_router.include_router(analytics_router, prefix="/datasets", tags=["Analytics"])
+from backend.api.insights import insights_router
+api_router.include_router(insights_router, prefix="/insights", tags=["AI Insights"])
+
+from backend.services.dataset_service import get_dataset_content
+from backend.services.chat_service import get_chat_history, save_chat_message
+from backend.ai.chat_agent import chat_agent
+from backend.schemas.chat import ChatRequest, ChatResponse, ChatMessage
 
 class CleanRequest(BaseModel):
     data: List[Dict[str, Any]]
@@ -25,10 +32,7 @@ class ForecastRequest(BaseModel):
     historical_data: List[Dict[str, Any]]
 
 
-class ChatRequest(BaseModel):
-    message: str
-    context: Optional[Dict[str, Any]] = None
-    model: str = "gemini-1.5-flash"
+# Chat schema is now in backend.schemas.chat
 
 
 @api_router.post("/clean")
@@ -58,11 +62,23 @@ async def get_me(current_user: dict = Depends(get_current_user)):
     return current_user
 
 
-@api_router.post("/ai/chat")
-async def ai_chat(req: ChatRequest, current_user: dict = Depends(get_current_user)):
+@api_router.get("/datasets/{dataset_id}/chat/history")
+async def fetch_chat_history(dataset_id: str, current_user: dict = Depends(get_current_user)):
+    """Fetch chat history for a specific dataset."""
+    user_id = current_user.get("id")
+    history = await get_chat_history(user_id, dataset_id)
+    return {"history": history}
+
+@api_router.post("/datasets/{dataset_id}/chat", response_model=ChatResponse)
+async def chat_with_dataset(
+    dataset_id: str, 
+    req: ChatRequest, 
+    current_user: dict = Depends(get_current_user)
+):
     """
-    Grounded LLM responses based on dataset schemas.
+    Grounded LLM responses based on dataset schemas and natural language questions.
     """
+    user_id = current_user.get("id")
     app_metadata = current_user.get("app_metadata", {})
     user_role = app_metadata.get("role", "Free")
 
@@ -79,64 +95,30 @@ async def ai_chat(req: ChatRequest, current_user: dict = Depends(get_current_use
             detail=f"The {selected_model} model requires a Pro or Admin subscription."
         )
 
-    message = req.message.lower()
+    # 1. Save User Message
+    user_msg = ChatMessage(role="user", content=req.message)
+    await save_chat_message(user_id, dataset_id, user_msg.model_dump())
 
-    if "churn" in message or "retention" in message:
-        return {
-            "response": "I've run a customer churn correlation audit. We identified 18 high-risk accounts in Tier-2 corporate segments with over 30 days of inactivity. Immediate action proposed: trigger automated re-engagement workflows via n8n.",
-            "data": {
-                "riskCount": 18,
-                "potentialLoss": "$3,000/mo",
-                "actionTrigger": "n8n segment_reengage",
-                "agent_model": selected_model
-            }
-        }
-    elif "anomaly" in message or "outlier" in message or "spike" in message:
-        return {
-            "response": "Anomaly detected: EU sales segments recorded a +24.8% growth spike on Thursdays between 6 PM and 9 PM. This correlates strongly with our newly launched referral campaign. I suggest scaling server allocations to prevent latency spikes.",
-            "data": {
-                "anomalySpike": "+24.8%",
-                "confidence": "98.4%",
-                "trafficClass": "EU Segment",
-                "agent_model": selected_model
-            }
-        }
-    elif "basket" in message or "size" in message or "checkout" in message:
-        return {
-            "response": "Cart abandonment audit completed. E-commerce metrics reveal a 68.4% cart abandonment rate. Proposal: cross-sell checkout bundles for 'Technical Accessories' to capture an estimated recovery.",
-            "data": {
-                "abandonmentRate": "68.4%",
-                "recoveryPotential": "$5,400",
-                "bundleOption": "Tech Packs",
-                "agent_model": selected_model
-            }
-        }
-    elif "security" in message or "isolated" in message or "db" in message:
-        return {
-            "response": "Security audit pass: Row-Level Security (RLS) is actively enforced. Client datasets are parsed asynchronously in isolated processes. Path traversal filters intercepted zero warning events.",
-            "data": {
-                "securityLevel": "AES-256 RLS",
-                "vulnerabilities": "0",
-                "sslCert": "Active",
-                "agent_model": selected_model
-            }
-        }
-    elif "n8n" in message or "pipeline" in message or "webhook" in message:
-        return {
-            "response": "Platform automations: We detect active connection hooks to both hosted and self-hosted n8n configurations. Manual sync commands take average 48ms under full tenant load.",
-            "data": {
-                "webhookPing": "48ms",
-                "triggersActive": "3 Active",
-                "connector": "SAML SSO",
-                "agent_model": selected_model
-            }
-        }
-    else:
-        return {
-            "response": f"Using {selected_model}: I have grounding rules active for your monthly revenue segment. Predictive ML forecasts indicate stable ARR trajectories over Q3. Let's scale automated webhook triggers to secure cart leakages.",
-            "data": {
-                "arrGrowthEst": "+14.2%",
-                "riskAssessment": "Low Risk",
-                "agent_model": selected_model
-            }
-        }
+    # 2. Get Dataset Context
+    try:
+        df = await get_dataset_content(user_id, dataset_id)
+    except Exception as e:
+        from fastapi import HTTPException, status
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Failed to load dataset: {str(e)}"
+        )
+
+    # 3. Generate AI Response
+    response_data = await chat_agent.generate_response(req.message, df, selected_model)
+
+    # 4. Save AI Message
+    ai_msg = ChatMessage(
+        role="ai", 
+        content=response_data.response,
+        references=[r.model_dump() for r in response_data.references],
+        suggested_questions=[q.model_dump() for q in response_data.suggested_questions]
+    )
+    await save_chat_message(user_id, dataset_id, ai_msg.model_dump())
+
+    return response_data

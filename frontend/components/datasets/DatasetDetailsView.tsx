@@ -1,13 +1,17 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { Dataset } from "@/services/datasetApi";
-import { X, Table2, Network, ShieldCheck, FileText, BarChart2 } from "lucide-react";
+import { X, Table2, Network, ShieldCheck, FileText, BarChart2, BrainCircuit } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import TableView from "./details/TableView";
 import SchemaMap from "./details/SchemaMap";
 import AIQualityAudit from "./details/AIQualityAudit";
 import TableSummary from "./details/TableSummary";
 import EDAAnalytics from "./details/EDAAnalytics";
+import AIInsightsTab from "./details/AIInsightsTab";
+import ChatPanel from "../chat/ChatPanel";
+import { MessageSquare } from "lucide-react";
+
 
 interface DatasetDetailsViewProps {
   dataset: Dataset;
@@ -15,11 +19,13 @@ interface DatasetDetailsViewProps {
   onBack: () => void;
 }
 
-type TabKey = 'summary' | 'table' | 'schema' | 'audit' | 'eda';
+type TabKey = 'summary' | 'table' | 'schema' | 'audit' | 'eda' | 'insights';
 
 export default function DatasetDetailsView({ dataset, onDatasetUpdated, onBack }: DatasetDetailsViewProps) {
   const [activeTab, setActiveTab] = useState<TabKey>('summary');
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -29,6 +35,7 @@ export default function DatasetDetailsView({ dataset, onDatasetUpdated, onBack }
 
   const tabs = [
     { id: 'summary' as TabKey, label: 'Table Summary', icon: FileText },
+    { id: 'insights' as TabKey, label: 'AI Insights', icon: BrainCircuit },
     { id: 'table' as TabKey, label: 'Table View', icon: Table2 },
     { id: 'schema' as TabKey, label: 'Schema Map', icon: Network },
     { id: 'audit' as TabKey, label: 'AI Quality Audit', icon: ShieldCheck },
@@ -51,12 +58,22 @@ export default function DatasetDetailsView({ dataset, onDatasetUpdated, onBack }
               Explore data, analyze schema, and review AI-driven quality checks.
             </p>
           </div>
-          <button 
-            onClick={onBack} 
-            className="p-2 bg-white border border-slate-200 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors shadow-sm"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsChatOpen(!isChatOpen)}
+              className={`p-2 border rounded-full transition-colors shadow-sm flex items-center justify-center ${isChatOpen ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'bg-white border-slate-200 hover:bg-slate-100 text-slate-400 hover:text-slate-600'}`}
+              title="Open AI Chat Assistant"
+            >
+              <MessageSquare className="w-5 h-5" />
+            </button>
+            <button 
+              onClick={onBack} 
+              className="p-2 bg-white border border-slate-200 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors shadow-sm"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
         </div>
 
         {/* Tabs */}
@@ -100,6 +117,7 @@ export default function DatasetDetailsView({ dataset, onDatasetUpdated, onBack }
             className="w-full flex flex-col h-full"
           >
             {activeTab === 'summary' && <TableSummary dataset={dataset} />}
+            {activeTab === 'insights' && <AIInsightsTab dataset={dataset} />}
             {activeTab === 'table' && <TableView dataset={dataset} />}
             {activeTab === 'schema' && <SchemaMap dataset={dataset} />}
             {activeTab === 'audit' && <AIQualityAudit dataset={dataset} onDatasetUpdated={onDatasetUpdated} />}
@@ -107,6 +125,12 @@ export default function DatasetDetailsView({ dataset, onDatasetUpdated, onBack }
           </motion.div>
         </AnimatePresence>
       </div>
+      
+      <ChatPanel 
+        datasetId={dataset.id} 
+        isOpen={isChatOpen} 
+        onClose={() => setIsChatOpen(false)} 
+      />
     </div>
   );
 }
