@@ -238,3 +238,20 @@ export const fetchDatasetEDA = async (datasetId: string): Promise<any> => {
 
   return res.json();
 };
+
+export const fetchDatasetAnalytics = async (datasetId: string, queryPayload: any): Promise<any> => {
+  const res = await fetch(`${API_BASE_URL}/datasets/${datasetId}/query`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(queryPayload)
+  });
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.detail || 'Failed to fetch analytics data');
+  }
+
+  return res.json();
+};

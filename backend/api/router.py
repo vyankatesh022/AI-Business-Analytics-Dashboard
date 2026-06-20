@@ -14,6 +14,8 @@ from backend.api.data_cleaning import data_cleaning_router
 api_router.include_router(data_cleaning_router, prefix="/datasets", tags=["Data Cleaning"])
 from backend.api.eda import eda_router
 api_router.include_router(eda_router, prefix="/datasets", tags=["EDA Analytics"])
+from backend.api.analytics import analytics_router
+api_router.include_router(analytics_router, prefix="/datasets", tags=["Analytics"])
 
 class CleanRequest(BaseModel):
     data: List[Dict[str, Any]]
