@@ -475,3 +475,58 @@ async def delete_folder(user_id: str, folder_id: str):
             f"/rest/v1/folders?id=eq.{folder_id}&user_id=eq.{user_id}"
         )
     return {"message": "Folder deleted successfully"}
+
+
+async def get_dataset_content(user_id: str, dataset_id: str):
+    """
+    Retrieves the dataset file content and returns it as a pandas DataFrame.
+    Validates ownership of the dataset via user_id.
+    """
+    import pandas as pd
+    import io
+
+    if _is_mock_mode():
+        db = _load_mock_db()
+        record = next((d for d in db if d.get("id") == dataset_id and d.get("user_id") == user_id), None)
+        if not record:
+            raise HTTPException(status_code=404, detail="Dataset not found or unauthorized")
+        
+        filename = record.get("original_filename", record.get("filename"))
+        folder_path = record.get("folder_id", "root") if record.get("folder_id") else "root"
+        local_file_path = os.path.join(LOCAL_DB_DIR, "uploads", user_id, folder_path, filename)
+        
+        # Fallback to older storage path style if not found
+        if not os.path.exists(local_file_path) and "filename" in record:
+             local_file_path = os.path.join(LOCAL_DB_DIR, "uploads", record["filename"].replace("/", os.sep))
+             
+        if not os.path.exists(local_file_path):
+            raise HTTPException(status_code=404, detail="Local dataset file not found")
+            
+        if filename.endswith(".csv"):
+            return pd.read_csv(local_file_path)
+        elif filename.endswith(".xlsx"):
+            return pd.read_excel(local_file_path)
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported file format")
+
+    async with get_supabase_client() as client:
+        # Verify ownership
+        res_get = await client.get(f"/rest/v1/datasets?id=eq.{dataset_id}&user_id=eq.{user_id}&select=filename")
+        data = res_get.json()
+        if not data:
+            raise HTTPException(status_code=404, detail="Dataset not found or unauthorized")
+            
+        storage_path = data[0]["filename"]
+
+        # Get file from storage
+        res_file = await client.get(f"/storage/v1/object/datasets/{storage_path}")
+        if res_file.status_code >= 400:
+            raise HTTPException(status_code=404, detail="Dataset file could not be downloaded")
+            
+        content = res_file.content
+        if storage_path.endswith(".csv"):
+            return pd.read_csv(io.BytesIO(content))
+        elif storage_path.endswith(".xlsx"):
+            return pd.read_excel(io.BytesIO(content))
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported file format")

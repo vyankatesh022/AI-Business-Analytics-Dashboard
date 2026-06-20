@@ -1,12 +1,13 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { Dataset } from "@/services/datasetApi";
-import { X, Table2, Network, ShieldCheck, FileText } from "lucide-react";
+import { X, Table2, Network, ShieldCheck, FileText, BarChart2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import TableView from "./details/TableView";
 import SchemaMap from "./details/SchemaMap";
 import AIQualityAudit from "./details/AIQualityAudit";
 import TableSummary from "./details/TableSummary";
+import EDAAnalytics from "./details/EDAAnalytics";
 
 interface DatasetDetailsViewProps {
   dataset: Dataset;
@@ -14,7 +15,7 @@ interface DatasetDetailsViewProps {
   onBack: () => void;
 }
 
-type TabKey = 'summary' | 'table' | 'schema' | 'audit';
+type TabKey = 'summary' | 'table' | 'schema' | 'audit' | 'eda';
 
 export default function DatasetDetailsView({ dataset, onDatasetUpdated, onBack }: DatasetDetailsViewProps) {
   const [activeTab, setActiveTab] = useState<TabKey>('summary');
@@ -31,6 +32,7 @@ export default function DatasetDetailsView({ dataset, onDatasetUpdated, onBack }
     { id: 'table' as TabKey, label: 'Table View', icon: Table2 },
     { id: 'schema' as TabKey, label: 'Schema Map', icon: Network },
     { id: 'audit' as TabKey, label: 'AI Quality Audit', icon: ShieldCheck },
+    { id: 'eda' as TabKey, label: 'EDA Report', icon: BarChart2 },
   ];
 
   return (
@@ -101,6 +103,7 @@ export default function DatasetDetailsView({ dataset, onDatasetUpdated, onBack }
             {activeTab === 'table' && <TableView dataset={dataset} />}
             {activeTab === 'schema' && <SchemaMap dataset={dataset} />}
             {activeTab === 'audit' && <AIQualityAudit dataset={dataset} onDatasetUpdated={onDatasetUpdated} />}
+            {activeTab === 'eda' && <EDAAnalytics dataset={dataset} />}
           </motion.div>
         </AnimatePresence>
       </div>

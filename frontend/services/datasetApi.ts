@@ -223,3 +223,18 @@ export const moveDataset = async (datasetId: string, folderId: string | null): P
   return res.json();
 };
 
+export const fetchDatasetEDA = async (datasetId: string): Promise<any> => {
+  const res = await fetch(`${API_BASE_URL}/datasets/${datasetId}/eda`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  });
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.detail || 'Failed to fetch EDA report');
+  }
+
+  return res.json();
+};
