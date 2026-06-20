@@ -6,6 +6,7 @@ import { ShieldAlert, AlertCircle, Copy, Search, Sparkles, TrendingUp, CheckCirc
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { analyzeDataset, cleanDataset } from "@/services/datasetApi";
 import { useToast } from "@/components/ui/Toast";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 interface AIQualityAuditProps {
   dataset: Dataset;
@@ -82,6 +83,19 @@ export default function AIQualityAudit({ dataset, onDatasetUpdated }: AIQualityA
   // Compute a mock overall score based on missing and anomalies
   const overallScore = Math.max(0, Math.min(100, Math.round(parseFloat(completeness) - parseFloat(anomaliesPercent))));
 
+  // Data for Recharts
+  const missingData = validation_report?.columns 
+    ? Object.entries(validation_report.columns)
+        .filter(([_, stats]: any) => stats.missing_count > 0)
+        .map(([col, stats]: any) => ({ name: col, count: stats.missing_count }))
+    : [];
+
+  const outlierData = outlier_report
+    ? Object.entries(outlier_report)
+        .filter(([_, stats]: any) => stats.outlier_count > 0)
+        .map(([col, stats]: any) => ({ name: col, count: stats.outlier_count }))
+    : [];
+
   const handleToggle = (idx: number) => {
     const newSelected = new Set(selectedIndices);
     if (newSelected.has(idx)) {
@@ -132,6 +146,45 @@ export default function AIQualityAudit({ dataset, onDatasetUpdated }: AIQualityA
           <CheckCircle2 className="w-8 h-8 text-emerald-500/50" />
         </div>
       </div>
+
+      {/* Charts Section */}
+      {(missingData.length > 0 || outlierData.length > 0) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {missingData.length > 0 && (
+            <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6">
+              <h3 className="text-sm font-bold text-slate-900 mb-4">Missing Values by Column</h3>
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={missingData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#64748b' }} tickLine={false} axisLine={{ stroke: '#cbd5e1' }} />
+                    <YAxis tick={{ fontSize: 12, fill: '#64748b' }} tickLine={false} axisLine={false} />
+                    <Tooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                    <Bar dataKey="count" fill="#38bdf8" radius={[4, 4, 0, 0]} name="Missing Cells" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+
+          {outlierData.length > 0 && (
+            <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6">
+              <h3 className="text-sm font-bold text-slate-900 mb-4">Detected Outliers by Column</h3>
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={outlierData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#64748b' }} tickLine={false} axisLine={{ stroke: '#cbd5e1' }} />
+                    <YAxis tick={{ fontSize: 12, fill: '#64748b' }} tickLine={false} axisLine={false} />
+                    <Tooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                    <Bar dataKey="count" fill="#f43f5e" radius={[4, 4, 0, 0]} name="Outliers" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Main Content Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
