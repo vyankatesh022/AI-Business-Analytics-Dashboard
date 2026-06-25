@@ -1,0 +1,41 @@
+.env
+.env.*
+*.pem
+*.key
+*.crt
+*.p12
+
+node_modules
+.next
+dist
+build
+coverage
+logs
+
+exports
+audit-exports
+dataset-exports
+
+# Python
+venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db
+
+#Docs
+docs 
+# Security Rules 
+.env 
+.env.* 
+*.pem 
+*.key 
+*.crt 
+*.p12 
+logs/ 
+audit-exports/ 
+security-reports/ 
+dataset-exports/ 
