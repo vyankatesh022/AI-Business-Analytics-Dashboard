@@ -31,6 +31,8 @@ docs
 # Security Rules 
 .env 
 .env.* 
+backend/.env
+backend/.env.*
 *.pem 
 *.key 
 *.crt 
