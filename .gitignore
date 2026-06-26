@@ -41,3 +41,6 @@ logs/
 audit-exports/ 
 security-reports/ 
 dataset-exports/ 
+billing-exports/
+invoice-exports/
+payment-exports/
