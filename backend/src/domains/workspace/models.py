@@ -13,6 +13,13 @@ class WorkspaceFolderBase(BaseModel):
 class WorkspaceFolderCreate(WorkspaceFolderBase):
     pass
 
+class WorkspaceFolderUpdate(BaseModel):
+    name: Optional[str] = None
+    parent_id: Optional[UUID] = None
+    color_label: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+
 class WorkspaceFolderResponse(WorkspaceFolderBase):
     id: UUID
     tenant_id: UUID
@@ -35,6 +42,17 @@ class WorkspaceDatasetCreate(WorkspaceDatasetBase):
     file_path: Optional[str] = None
     size_bytes: Optional[int] = None
     row_count: Optional[int] = None
+
+class WorkspaceDatasetUpdate(BaseModel):
+    name: Optional[str] = None
+    folder_id: Optional[UUID] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    status: Optional[str] = None
+    format: Optional[str] = None
+    size_bytes: Optional[int] = None
+    row_count: Optional[int] = None
+    file_path: Optional[str] = None
 
 class WorkspaceDatasetResponse(WorkspaceDatasetBase):
     id: UUID
@@ -60,6 +78,16 @@ class WorkspaceConnectionBase(BaseModel):
     username: Optional[str] = None
 
 class WorkspaceConnectionCreate(WorkspaceConnectionBase):
+    password: Optional[str] = None
+
+class WorkspaceConnectionUpdate(BaseModel):
+    name: Optional[str] = None
+    folder_id: Optional[UUID] = None
+    type: Optional[str] = None
+    host: Optional[str] = None
+    port: Optional[int] = None
+    database_name: Optional[str] = None
+    username: Optional[str] = None
     password: Optional[str] = None
 
 class WorkspaceConnectionResponse(WorkspaceConnectionBase):

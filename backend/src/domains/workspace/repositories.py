@@ -45,6 +45,43 @@ class WorkspaceRepository:
                     """, (tenant_id, organization_id))
                 return cur.fetchall()
 
+    def update_folder(self, tenant_id: UUID, organization_id: UUID, folder_id: UUID, update_data: dict) -> Optional[dict]:
+        with psycopg.connect(self.dsn) as conn:
+            with conn.cursor(row_factory=dict_row) as cur:
+                set_clauses = []
+                values = []
+                for k, v in update_data.items():
+                    set_clauses.append(f"{k} = %s")
+                    values.append(v)
+                
+                if not set_clauses:
+                    return None
+
+                set_clauses.append("updated_at = NOW()")
+                
+                query = f"""
+                    UPDATE workspace_folders
+                    SET {", ".join(set_clauses)}
+                    WHERE id = %s AND tenant_id = %s AND organization_id = %s AND deleted_at IS NULL
+                    RETURNING *;
+                """
+                values.extend([folder_id, tenant_id, organization_id])
+                
+                cur.execute(query, tuple(values))
+                conn.commit()
+                return cur.fetchone()
+
+    def delete_folder(self, tenant_id: UUID, organization_id: UUID, folder_id: UUID) -> bool:
+        with psycopg.connect(self.dsn) as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    UPDATE workspace_folders
+                    SET deleted_at = NOW()
+                    WHERE id = %s AND tenant_id = %s AND organization_id = %s AND deleted_at IS NULL;
+                """, (folder_id, tenant_id, organization_id))
+                conn.commit()
+                return cur.rowcount > 0
+
     def create_dataset(self, tenant_id: UUID, organization_id: UUID, owner_id: UUID, dataset_data: dict) -> dict:
         with psycopg.connect(self.dsn) as conn:
             with conn.cursor(row_factory=dict_row) as cur:
@@ -87,6 +124,43 @@ class WorkspaceRepository:
                     """, (tenant_id, organization_id))
                 return cur.fetchall()
 
+    def update_dataset(self, tenant_id: UUID, organization_id: UUID, dataset_id: UUID, update_data: dict) -> Optional[dict]:
+        with psycopg.connect(self.dsn) as conn:
+            with conn.cursor(row_factory=dict_row) as cur:
+                set_clauses = []
+                values = []
+                for k, v in update_data.items():
+                    set_clauses.append(f"{k} = %s")
+                    values.append(v)
+                
+                if not set_clauses:
+                    return None
+
+                set_clauses.append("updated_at = NOW()")
+                
+                query = f"""
+                    UPDATE workspace_datasets
+                    SET {", ".join(set_clauses)}
+                    WHERE id = %s AND tenant_id = %s AND organization_id = %s AND deleted_at IS NULL
+                    RETURNING *;
+                """
+                values.extend([dataset_id, tenant_id, organization_id])
+                
+                cur.execute(query, tuple(values))
+                conn.commit()
+                return cur.fetchone()
+
+    def delete_dataset(self, tenant_id: UUID, organization_id: UUID, dataset_id: UUID) -> bool:
+        with psycopg.connect(self.dsn) as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    UPDATE workspace_datasets
+                    SET deleted_at = NOW()
+                    WHERE id = %s AND tenant_id = %s AND organization_id = %s AND deleted_at IS NULL;
+                """, (dataset_id, tenant_id, organization_id))
+                conn.commit()
+                return cur.rowcount > 0
+
     def create_connection(self, tenant_id: UUID, organization_id: UUID, owner_id: UUID, connection_data: dict) -> dict:
         with psycopg.connect(self.dsn) as conn:
             with conn.cursor(row_factory=dict_row) as cur:
@@ -127,6 +201,43 @@ class WorkspaceRepository:
                         ORDER BY name ASC;
                     """, (tenant_id, organization_id))
                 return cur.fetchall()
+
+    def update_connection(self, tenant_id: UUID, organization_id: UUID, connection_id: UUID, update_data: dict) -> Optional[dict]:
+        with psycopg.connect(self.dsn) as conn:
+            with conn.cursor(row_factory=dict_row) as cur:
+                set_clauses = []
+                values = []
+                for k, v in update_data.items():
+                    set_clauses.append(f"{k} = %s")
+                    values.append(v)
+                
+                if not set_clauses:
+                    return None
+
+                set_clauses.append("updated_at = NOW()")
+                
+                query = f"""
+                    UPDATE workspace_connections
+                    SET {", ".join(set_clauses)}
+                    WHERE id = %s AND tenant_id = %s AND organization_id = %s AND deleted_at IS NULL
+                    RETURNING *;
+                """
+                values.extend([connection_id, tenant_id, organization_id])
+                
+                cur.execute(query, tuple(values))
+                conn.commit()
+                return cur.fetchone()
+
+    def delete_connection(self, tenant_id: UUID, organization_id: UUID, connection_id: UUID) -> bool:
+        with psycopg.connect(self.dsn) as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    UPDATE workspace_connections
+                    SET deleted_at = NOW()
+                    WHERE id = %s AND tenant_id = %s AND organization_id = %s AND deleted_at IS NULL;
+                """, (connection_id, tenant_id, organization_id))
+                conn.commit()
+                return cur.rowcount > 0
 
     def log_activity(self, tenant_id: UUID, organization_id: UUID, user_id: UUID, entity_type: str, entity_id: UUID, action: str, details: dict):
         with psycopg.connect(self.dsn) as conn:

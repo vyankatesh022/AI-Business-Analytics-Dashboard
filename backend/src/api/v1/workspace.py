@@ -6,9 +6,9 @@ import os
 from src.domains.workspace.repositories import WorkspaceRepository
 from src.domains.workspace.services import WorkspaceService
 from src.domains.workspace.models import (
-    WorkspaceFolderCreate, WorkspaceFolderResponse,
-    WorkspaceDatasetCreate, WorkspaceDatasetResponse,
-    WorkspaceConnectionCreate, WorkspaceConnectionResponse
+    WorkspaceFolderCreate, WorkspaceFolderUpdate, WorkspaceFolderResponse,
+    WorkspaceDatasetCreate, WorkspaceDatasetUpdate, WorkspaceDatasetResponse,
+    WorkspaceConnectionCreate, WorkspaceConnectionUpdate, WorkspaceConnectionResponse
 )
 from src.security.context import get_security_context
 
@@ -40,6 +40,29 @@ def get_folders(
 ):
     return service.get_folders(context.tenant_id, context.organization_id, parent_id)
 
+@router.patch("/folders/{folder_id}", response_model=WorkspaceFolderResponse)
+def update_folder(
+    folder_id: UUID,
+    folder_in: WorkspaceFolderUpdate,
+    service: WorkspaceService = Depends(get_workspace_service),
+    context = Depends(get_security_context)
+):
+    folder = service.update_folder(context.tenant_id, context.organization_id, context.user_id, folder_id, folder_in)
+    if not folder:
+        raise HTTPException(status_code=404, detail="Folder not found")
+    return folder
+
+@router.delete("/folders/{folder_id}")
+def delete_folder(
+    folder_id: UUID,
+    service: WorkspaceService = Depends(get_workspace_service),
+    context = Depends(get_security_context)
+):
+    success = service.delete_folder(context.tenant_id, context.organization_id, context.user_id, folder_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Folder not found")
+    return {"message": "Folder deleted"}
+
 # --- Datasets ---
 
 @router.post("/datasets", response_model=WorkspaceDatasetResponse)
@@ -61,6 +84,29 @@ def get_datasets(
 ):
     return service.get_datasets(context.tenant_id, context.organization_id, folder_id)
 
+@router.patch("/datasets/{dataset_id}", response_model=WorkspaceDatasetResponse)
+def update_dataset(
+    dataset_id: UUID,
+    dataset_in: WorkspaceDatasetUpdate,
+    service: WorkspaceService = Depends(get_workspace_service),
+    context = Depends(get_security_context)
+):
+    dataset = service.update_dataset(context.tenant_id, context.organization_id, context.user_id, dataset_id, dataset_in)
+    if not dataset:
+        raise HTTPException(status_code=404, detail="Dataset not found")
+    return dataset
+
+@router.delete("/datasets/{dataset_id}")
+def delete_dataset(
+    dataset_id: UUID,
+    service: WorkspaceService = Depends(get_workspace_service),
+    context = Depends(get_security_context)
+):
+    success = service.delete_dataset(context.tenant_id, context.organization_id, context.user_id, dataset_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Dataset not found")
+    return {"message": "Dataset deleted"}
+
 # --- Connections ---
 
 @router.post("/connections", response_model=WorkspaceConnectionResponse)
@@ -81,3 +127,26 @@ def get_connections(
     context = Depends(get_security_context)
 ):
     return service.get_connections(context.tenant_id, context.organization_id, folder_id)
+
+@router.patch("/connections/{connection_id}", response_model=WorkspaceConnectionResponse)
+def update_connection(
+    connection_id: UUID,
+    connection_in: WorkspaceConnectionUpdate,
+    service: WorkspaceService = Depends(get_workspace_service),
+    context = Depends(get_security_context)
+):
+    connection = service.update_connection(context.tenant_id, context.organization_id, context.user_id, connection_id, connection_in)
+    if not connection:
+        raise HTTPException(status_code=404, detail="Connection not found")
+    return connection
+
+@router.delete("/connections/{connection_id}")
+def delete_connection(
+    connection_id: UUID,
+    service: WorkspaceService = Depends(get_workspace_service),
+    context = Depends(get_security_context)
+):
+    success = service.delete_connection(context.tenant_id, context.organization_id, context.user_id, connection_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Connection not found")
+    return {"message": "Connection deleted"}
