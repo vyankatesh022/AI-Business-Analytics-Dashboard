@@ -11,6 +11,7 @@ from .security.audit import log_audit_event
 from .security.context import get_security_context
 from .api.v1.billing import router as billing_router
 from .api.v1.webhooks import router as webhooks_router
+from .api.v1.workspace import router as workspace_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -48,6 +49,7 @@ app.add_middleware(ContextMiddleware)
 # Register Routers
 app.include_router(billing_router, prefix="/api/v1")
 app.include_router(webhooks_router, prefix="/api/v1")
+app.include_router(workspace_router, prefix="/api/v1")
 
 # Example Protected Route
 @app.get("/api/v1/health")
