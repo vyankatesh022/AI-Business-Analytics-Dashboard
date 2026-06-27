@@ -24,6 +24,7 @@ from .api.v1.analytics import router as analytics_router
 from .api.v1.reporting import router as reporting_router
 from .api.v1.ai import router as ai_router
 from .api.v1.workflows import router as workflows_router
+from .api.v1.integrations import router as integrations_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -69,6 +70,7 @@ app.include_router(analytics_router, prefix="/api/v1")
 app.include_router(reporting_router, prefix="/api/v1")
 app.include_router(ai_router, prefix="/api/v1")
 app.include_router(workflows_router, prefix="/api/v1")
+app.include_router(integrations_router, prefix="/api/v1")
 
 # Example Protected Route
 @app.get("/api/v1/health")

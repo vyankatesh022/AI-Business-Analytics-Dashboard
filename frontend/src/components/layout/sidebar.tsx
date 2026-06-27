@@ -16,7 +16,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
-  Workflow
+  Workflow,
+  Network,
+  Code
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -37,6 +39,8 @@ const navItems: NavItem[] = [
 
 const bottomNavItems: NavItem[] = [
   { title: "Organizations", href: "/organizations", icon: <Building2 className="h-5 w-5" /> },
+  { title: "Integrations", href: "/integrations", icon: <Network className="h-5 w-5" /> },
+  { title: "Developer", href: "/integrations/api-keys", icon: <Code className="h-5 w-5" /> },
   { title: "Billing", href: "/billing", icon: <CreditCard className="h-5 w-5" /> },
   { title: "Settings", href: "/settings", icon: <Settings className="h-5 w-5" /> },
 ]
