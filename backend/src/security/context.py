@@ -3,15 +3,14 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 class SecurityContext(BaseModel):
+    supabase_user_id: Optional[str] = None
     user_id: Optional[str] = None
-    tenant_id: Optional[str] = None
-    organization_id: Optional[str] = None
+    account_id: Optional[str] = None
     role: Optional[str] = None
     permissions: List[str] = Field(default_factory=list)
     request_id: Optional[str] = None
-    correlation_id: Optional[str] = None
 
-# Context variable for safe multi-tenant isolation across asynchronous requests
+# Context variable for safe account isolation across asynchronous requests
 security_context_var: ContextVar[SecurityContext] = ContextVar(
     "security_context", default=SecurityContext()
 )

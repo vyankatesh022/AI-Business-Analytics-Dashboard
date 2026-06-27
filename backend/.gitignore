@@ -1,0 +1,52 @@
+# Environments
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# AWS and Supabase Secrets
+*.pem
+*.key
+
+# Temporary files
+*.log
+tmp/
+temp/
+
+# Model Artifacts & Data
+datasets/
+exports/
+models/
