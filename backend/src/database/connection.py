@@ -42,13 +42,15 @@ class DatabaseConnectionWrapper:
     async def execute(self, query: str, params: tuple = None):
         return await self.conn.execute(query, params)
         
+    def cursor(self, **kwargs):
+        return self.conn.cursor(**kwargs)
+        
     async def commit(self):
         await self.conn.commit()
         
     async def rollback(self):
         await self.conn.rollback()
 
-@asynccontextmanager
 async def get_db_connection() -> AsyncGenerator[DatabaseConnectionWrapper, None]:
     """
     Yields an asynchronous connection wrapper from the pool.

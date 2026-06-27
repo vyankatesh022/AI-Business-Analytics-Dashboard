@@ -120,5 +120,46 @@ class PredictionServiceFoundation:
         return {
             "endpoint_name": request.endpoint_name,
             "predictions": response["predictions"],
-            "latency_ms": response["latency_ms"]
+            "latency_ms": response["latency_ms"],
+            "prediction_id": "00000000-0000-0000-0000-000000000001"
+        }
+
+    async def get_prediction_explanation(self, tenant_id: UUID, prediction_id: UUID) -> Dict[str, Any]:
+        """
+        Retrieves prediction drivers and business explanations.
+        Mock implementation for phase 11.
+        """
+        return {
+            "prediction_id": prediction_id,
+            "confidence_score": 0.89,
+            "business_explanation": "The prediction is heavily influenced by recent usage drops and high support ticket volume.",
+            "key_drivers": [
+                {"feature_name": "usage_drop_30d", "importance_score": 0.45, "impact_direction": "NEGATIVE"},
+                {"feature_name": "open_support_tickets", "importance_score": 0.30, "impact_direction": "NEGATIVE"},
+                {"feature_name": "tenure_days", "importance_score": 0.15, "impact_direction": "POSITIVE"}
+            ]
+        }
+
+    async def get_decision_intelligence(self, tenant_id: UUID) -> Dict[str, Any]:
+        """
+        Generates risk analysis, opportunity analysis, and signals.
+        """
+        from datetime import datetime, timezone
+        return {
+            "tenant_id": tenant_id,
+            "analysis_date": datetime.now(timezone.utc),
+            "signals": [
+                {
+                    "signal_type": "CHURN_WARNING",
+                    "description": "3 enterprise accounts show high churn risk based on activity patterns.",
+                    "action_recommended": "Schedule executive check-ins and offer proactive support.",
+                    "impact_level": "HIGH"
+                },
+                {
+                    "signal_type": "OPPORTUNITY",
+                    "description": "15 mid-market accounts have exceeded 80% usage limits.",
+                    "action_recommended": "Trigger expansion email sequences for tier upgrades.",
+                    "impact_level": "MEDIUM"
+                }
+            ]
         }

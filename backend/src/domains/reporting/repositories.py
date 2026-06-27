@@ -1,7 +1,7 @@
 import json
 from typing import List, Optional
 from uuid import UUID
-from backend.src.database.connection import pool
+from src.database.connection import pool
 from .models import (
     ReportCreate, ReportUpdate, ReportResponse, ReportVersion,
     ReportScheduleCreate, ReportScheduleResponse,

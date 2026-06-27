@@ -84,3 +84,30 @@ class PredictionResponse(BaseModel):
     endpoint_name: str
     predictions: Any
     latency_ms: float
+    prediction_id: Optional[UUID] = None
+
+
+class FeatureImportance(BaseModel):
+    feature_name: str
+    importance_score: float
+    impact_direction: str
+
+
+class PredictionExplanation(BaseModel):
+    prediction_id: UUID
+    confidence_score: float
+    business_explanation: str
+    key_drivers: List[FeatureImportance]
+
+
+class DecisionSignal(BaseModel):
+    signal_type: str = Field(..., description="'RISK', 'OPPORTUNITY', 'GROWTH', 'CHURN_WARNING'")
+    description: str
+    action_recommended: str
+    impact_level: str = Field(..., description="'HIGH', 'MEDIUM', 'LOW'")
+
+
+class DecisionIntelligenceResponse(BaseModel):
+    tenant_id: UUID
+    analysis_date: datetime
+    signals: List[DecisionSignal]

@@ -14,6 +14,8 @@ from src.domains.ml.models import (
     PredictionResponse,
     SageMakerEndpointCreate,
     SageMakerEndpointResponse,
+    PredictionExplanation,
+    DecisionIntelligenceResponse,
 )
 from src.domains.ml.repositories import MLRepository
 from src.domains.ml.services import PredictionServiceFoundation, TrainingPipeline
@@ -125,3 +127,24 @@ async def predict(
         return result
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/explainability/{prediction_id}", response_model=PredictionExplanation)
+async def get_prediction_explanation(
+    prediction_id: UUID,
+    db: AsyncConnection = Depends(get_db_connection),
+    tenant_id: UUID = Depends(lambda: UUID("00000000-0000-0000-0000-000000000000")),
+):
+    service = PredictionServiceFoundation(db)
+    result = await service.get_prediction_explanation(tenant_id=tenant_id, prediction_id=prediction_id)
+    return result
+
+
+@router.get("/decision-intelligence", response_model=DecisionIntelligenceResponse)
+async def get_decision_intelligence(
+    db: AsyncConnection = Depends(get_db_connection),
+    tenant_id: UUID = Depends(lambda: UUID("00000000-0000-0000-0000-000000000000")),
+):
+    service = PredictionServiceFoundation(db)
+    result = await service.get_decision_intelligence(tenant_id=tenant_id)
+    return result

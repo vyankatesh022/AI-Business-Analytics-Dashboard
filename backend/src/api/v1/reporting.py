@@ -2,16 +2,16 @@ from typing import List
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, status
 
-from backend.src.security.auth import get_current_user
-from backend.src.api.middleware import require_role
-from backend.src.domains.reporting.models import (
+from src.security.auth import get_current_user
+from src.security.authorization import require_permissions
+from src.domains.reporting.models import (
     ReportCreate, ReportUpdate, ReportResponse,
     ReportScheduleCreate, ReportScheduleResponse,
     ReportExportCreate, ReportExportResponse,
     ReportShareCreate, ReportShareResponse
 )
-from backend.src.domains.reporting.repositories import get_report_repository
-from backend.src.domains.reporting.services import get_reporting_service, ReportingService
+from src.domains.reporting.repositories import get_report_repository
+from src.domains.reporting.services import get_reporting_service, ReportingService
 
 router = APIRouter(prefix="/accounts/{account_id}/reports", tags=["reporting"])
 
@@ -22,7 +22,7 @@ def get_service(repo = Depends(get_report_repository)) -> ReportingService:
 async def create_report(
     account_id: UUID,
     data: ReportCreate,
-    user=Depends(require_role(["Owner", "Admin", "Manager", "Analyst"])),
+    user=Depends(require_permissions(["Owner", "Admin", "Manager", "Analyst"])),
     service: ReportingService = Depends(get_service)
 ):
     """Create a new report in the report builder."""
@@ -33,7 +33,7 @@ async def list_reports(
     account_id: UUID,
     skip: int = 0,
     limit: int = 50,
-    user=Depends(require_role(["Owner", "Admin", "Manager", "Analyst", "Viewer"])),
+    user=Depends(require_permissions(["Owner", "Admin", "Manager", "Analyst", "Viewer"])),
     service: ReportingService = Depends(get_service)
 ):
     """List reports for the account."""
@@ -43,7 +43,7 @@ async def list_reports(
 async def get_report(
     account_id: UUID,
     report_id: UUID,
-    user=Depends(require_role(["Owner", "Admin", "Manager", "Analyst", "Viewer"])),
+    user=Depends(require_permissions(["Owner", "Admin", "Manager", "Analyst", "Viewer"])),
     service: ReportingService = Depends(get_service)
 ):
     """Get a specific report."""
@@ -57,7 +57,7 @@ async def update_report(
     account_id: UUID,
     report_id: UUID,
     data: ReportUpdate,
-    user=Depends(require_role(["Owner", "Admin", "Manager", "Analyst"])),
+    user=Depends(require_permissions(["Owner", "Admin", "Manager", "Analyst"])),
     service: ReportingService = Depends(get_service)
 ):
     """Update a report (creates a new version)."""
@@ -70,7 +70,7 @@ async def update_report(
 async def delete_report(
     account_id: UUID,
     report_id: UUID,
-    user=Depends(require_role(["Owner", "Admin", "Manager"])),
+    user=Depends(require_permissions(["Owner", "Admin", "Manager"])),
     service: ReportingService = Depends(get_service)
 ):
     """Delete a report."""
@@ -85,7 +85,7 @@ async def export_report(
     report_id: UUID,
     data: ReportExportCreate,
     background_tasks: BackgroundTasks,
-    user=Depends(require_role(["Owner", "Admin", "Manager", "Analyst", "Viewer"])),
+    user=Depends(require_permissions(["Owner", "Admin", "Manager", "Analyst", "Viewer"])),
     service: ReportingService = Depends(get_service)
 ):
     """Trigger a report export (runs in background)."""
@@ -95,7 +95,7 @@ async def export_report(
 async def list_report_exports(
     account_id: UUID,
     report_id: UUID,
-    user=Depends(require_role(["Owner", "Admin", "Manager", "Analyst", "Viewer"])),
+    user=Depends(require_permissions(["Owner", "Admin", "Manager", "Analyst", "Viewer"])),
     service: ReportingService = Depends(get_service)
 ):
     """List exports for a report."""
@@ -107,7 +107,7 @@ async def create_schedule(
     account_id: UUID,
     report_id: UUID,
     data: ReportScheduleCreate,
-    user=Depends(require_role(["Owner", "Admin", "Manager", "Analyst"])),
+    user=Depends(require_permissions(["Owner", "Admin", "Manager", "Analyst"])),
     service: ReportingService = Depends(get_service)
 ):
     """Schedule a report delivery."""
@@ -117,7 +117,7 @@ async def create_schedule(
 async def list_schedules(
     account_id: UUID,
     report_id: UUID,
-    user=Depends(require_role(["Owner", "Admin", "Manager", "Analyst"])),
+    user=Depends(require_permissions(["Owner", "Admin", "Manager", "Analyst"])),
     service: ReportingService = Depends(get_service)
 ):
     """List schedules for a report."""
@@ -129,7 +129,7 @@ async def share_report(
     account_id: UUID,
     report_id: UUID,
     data: ReportShareCreate,
-    user=Depends(require_role(["Owner", "Admin", "Manager", "Analyst"])),
+    user=Depends(require_permissions(["Owner", "Admin", "Manager", "Analyst"])),
     service: ReportingService = Depends(get_service)
 ):
     """Share a report."""
