@@ -115,3 +115,42 @@ class FunnelResultStep(BaseModel):
     step_name: str
     users: int
     conversion_rate: float
+
+class SegmentResult(BaseModel):
+    segment_size: int
+    percentage_of_total: float
+
+class RevenueTrendDataPoint(BaseModel):
+    date: str
+    revenue: float
+    mrr: Optional[float] = None
+    arr: Optional[float] = None
+
+class RevenueTrendResult(BaseModel):
+    current_mrr: float
+    mrr_growth_rate: float
+    data: List[RevenueTrendDataPoint]
+
+class RetentionCurveDataPoint(BaseModel):
+    day: int
+    retention_rate: float
+
+class RetentionCurveResult(BaseModel):
+    overall_retention_rate: float
+    curve: List[RetentionCurveDataPoint]
+
+class ColumnMetadata(BaseModel):
+    name: str
+    type: str
+    missing_count: int
+    unique_count: int
+    mean: Optional[float] = None
+    min: Optional[float] = None
+    max: Optional[float] = None
+
+class FileAnalysisResult(BaseModel):
+    filename: str
+    row_count: int
+    column_count: int
+    columns: List[ColumnMetadata]
+    preview: List[Dict[str, Any]]

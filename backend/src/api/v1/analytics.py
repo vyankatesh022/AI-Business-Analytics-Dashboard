@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File
 from typing import List
 from uuid import UUID
 import logging
@@ -11,7 +11,10 @@ from ...domains.analytics.models import (
     DashboardCreate, DashboardResponse,
     KPICreate, KPIResponse, KPIResult,
     CohortCreate, CohortResponse, CohortResultCell,
-    FunnelCreate, FunnelResponse, FunnelResultStep
+    FunnelCreate, FunnelResponse, FunnelResultStep,
+    SegmentCreate, SegmentResponse, SegmentResult,
+    RevenueTrendResult, RetentionCurveResult,
+    FileAnalysisResult
 )
 from ...domains.analytics.services import AnalyticsEngineService
 
@@ -116,3 +119,54 @@ async def calculate_funnel(
 ):
     await log_audit_event("calculate_funnel", "funnel", str(funnel_id), request)
     return await service.calculate_funnel(context.tenant_id, funnel_id)
+
+@router.post("/segments", response_model=SegmentResponse, dependencies=[Depends(require_permissions(["analytics.write"]))])
+async def create_segment(
+    request: Request,
+    data: SegmentCreate,
+    context: SecurityContext = Depends(get_security_context),
+    service: AnalyticsEngineService = Depends(get_analytics_service)
+):
+    segment = await service.create_segment(context.tenant_id, data)
+    await log_audit_event("create_segment", "segment", str(segment.id), request)
+    return segment
+
+@router.get("/segments/{segment_id}/calculate", response_model=SegmentResult, dependencies=[Depends(require_permissions(["analytics.read"]))])
+async def calculate_segment(
+    segment_id: UUID,
+    request: Request,
+    context: SecurityContext = Depends(get_security_context),
+    service: AnalyticsEngineService = Depends(get_analytics_service)
+):
+    await log_audit_event("calculate_segment", "segment", str(segment_id), request)
+    return await service.calculate_segment(context.tenant_id, segment_id)
+
+@router.get("/revenue/trends", response_model=RevenueTrendResult, dependencies=[Depends(require_permissions(["analytics.read"]))])
+async def calculate_revenue_metrics(
+    request: Request,
+    context: SecurityContext = Depends(get_security_context),
+    service: AnalyticsEngineService = Depends(get_analytics_service)
+):
+    await log_audit_event("calculate_revenue", "revenue", None, request)
+    return await service.calculate_revenue_metrics(context.tenant_id)
+
+@router.get("/retention/curves", response_model=RetentionCurveResult, dependencies=[Depends(require_permissions(["analytics.read"]))])
+async def calculate_retention_metrics(
+    request: Request,
+    context: SecurityContext = Depends(get_security_context),
+    service: AnalyticsEngineService = Depends(get_analytics_service)
+):
+    await log_audit_event("calculate_retention", "retention", None, request)
+    return await service.calculate_retention_metrics(context.tenant_id)
+
+@router.post("/analyze-file", response_model=FileAnalysisResult, dependencies=[Depends(require_permissions(["analytics.write"]))])
+async def analyze_file(
+    request: Request,
+    file: UploadFile = File(...),
+    context: SecurityContext = Depends(get_security_context),
+    service: AnalyticsEngineService = Depends(get_analytics_service)
+):
+    content = await file.read()
+    result = await service.analyze_file(context.tenant_id, content, file.filename)
+    await log_audit_event("analyze_file", "file", file.filename, request)
+    return result

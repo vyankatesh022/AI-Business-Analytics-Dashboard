@@ -126,3 +126,39 @@ class AnalyticsRepository:
             if 'conversion_window' in row and not isinstance(row['conversion_window'], str):
                  row['conversion_window'] = str(row['conversion_window'])
             return FunnelResponse(**row)
+
+    async def create_segment(self, account_id: UUID, data: SegmentCreate) -> SegmentResponse:
+        async with get_db_connection() as conn:
+            query = """
+                INSERT INTO segment_definitions (account_id, name, description, dataset_id, rules)
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING id, account_id, name, description, dataset_id, rules, created_at, updated_at
+            """
+            row = await conn.execute_and_fetch_one(
+                query,
+                (account_id, data.name, data.description, data.dataset_id, json.dumps(data.rules))
+            )
+            return SegmentResponse(**row)
+
+    async def get_segments(self, account_id: UUID) -> List[SegmentResponse]:
+        async with get_db_connection() as conn:
+            query = """
+                SELECT id, account_id, name, description, dataset_id, rules, created_at, updated_at
+                FROM segment_definitions
+                WHERE account_id = %s
+                ORDER BY created_at DESC
+            """
+            rows = await conn.execute_and_fetch_all(query, (account_id,))
+            return [SegmentResponse(**row) for row in rows]
+
+    async def get_segment_by_id(self, account_id: UUID, segment_id: UUID) -> Optional[SegmentResponse]:
+        async with get_db_connection() as conn:
+            query = """
+                SELECT id, account_id, name, description, dataset_id, rules, created_at, updated_at
+                FROM segment_definitions
+                WHERE account_id = %s AND id = %s
+            """
+            row = await conn.execute_and_fetch_one(query, (account_id, segment_id))
+            if not row:
+                return None
+            return SegmentResponse(**row)
