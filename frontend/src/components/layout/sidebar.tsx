@@ -15,7 +15,8 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Menu
+  Menu,
+  Workflow
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -31,6 +32,7 @@ const navItems: NavItem[] = [
   { title: "Predictions", href: "/predictions", icon: <BrainCircuit className="h-5 w-5" /> },
   { title: "AI Insights", href: "/ai-insights", icon: <Sparkles className="h-5 w-5" /> },
   { title: "Reporting", href: "/reporting", icon: <FileText className="h-5 w-5" /> },
+  { title: "Workflows", href: "/workflows", icon: <Workflow className="h-5 w-5" /> },
 ]
 
 const bottomNavItems: NavItem[] = [

@@ -50,3 +50,6 @@ temp/
 datasets/
 exports/
 models/
+workflow_dumps/
+queue_snapshots/
+secrets.json
