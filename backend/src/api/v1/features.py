@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from psycopg import AsyncConnection
 
-from src.database.connection import get_db
+from src.database.connection import get_db_connection
 from src.domains.features.models import (
     FeatureGroupCreate,
     FeatureGroupResponse,
@@ -12,7 +12,7 @@ from src.domains.features.models import (
 )
 from src.domains.features.repositories import FeatureRepository
 from src.domains.features.services import FeatureEngineeringEngine
-from src.security.rbac import Role, require_role
+
 
 router = APIRouter(prefix="/features", tags=["features"])
 
@@ -20,7 +20,7 @@ router = APIRouter(prefix="/features", tags=["features"])
 @router.post("/groups", response_model=FeatureGroupResponse, status_code=status.HTTP_201_CREATED)
 async def create_feature_group(
     request: FeatureGroupCreate,
-    db: AsyncConnection = Depends(get_db),
+    db: AsyncConnection = Depends(get_db_connection),
     tenant_id: UUID = Depends(lambda: UUID("00000000-0000-0000-0000-000000000000")),
     organization_id: UUID = Depends(lambda: UUID("00000000-0000-0000-0000-000000000000")),
     user_id: UUID = Depends(lambda: UUID("00000000-0000-0000-0000-000000000000")),
@@ -39,7 +39,7 @@ async def create_feature_group(
 async def list_feature_groups(
     limit: int = 50,
     offset: int = 0,
-    db: AsyncConnection = Depends(get_db),
+    db: AsyncConnection = Depends(get_db_connection),
     tenant_id: UUID = Depends(lambda: UUID("00000000-0000-0000-0000-000000000000")),
     organization_id: UUID = Depends(lambda: UUID("00000000-0000-0000-0000-000000000000")),
 ):
@@ -53,7 +53,7 @@ async def list_feature_groups(
 @router.get("/groups/{group_id}", response_model=FeatureGroupWithFeaturesResponse)
 async def get_feature_group_details(
     group_id: UUID,
-    db: AsyncConnection = Depends(get_db),
+    db: AsyncConnection = Depends(get_db_connection),
     tenant_id: UUID = Depends(lambda: UUID("00000000-0000-0000-0000-000000000000")),
 ):
     engine = FeatureEngineeringEngine(db)

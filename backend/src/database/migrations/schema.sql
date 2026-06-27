@@ -78,7 +78,75 @@ CREATE TABLE IF NOT EXISTS dashboards (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     account_id UUID NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
+    description TEXT,
+    layout JSONB DEFAULT '[]',
     created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Dashboard Cards (Widgets)
+CREATE TABLE IF NOT EXISTS dashboard_cards (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    dashboard_id UUID NOT NULL REFERENCES dashboards(id) ON DELETE CASCADE,
+    account_id UUID NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    type VARCHAR(50) NOT NULL, 
+    title VARCHAR(255) NOT NULL,
+    config JSONB NOT NULL,
+    position JSONB NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- KPI Definitions
+CREATE TABLE IF NOT EXISTS kpi_definitions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    account_id UUID NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    dataset_id UUID NOT NULL REFERENCES datasets(id) ON DELETE CASCADE,
+    metric_type VARCHAR(50) NOT NULL,
+    metric_column VARCHAR(255),
+    filters JSONB DEFAULT '[]',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Cohort Definitions
+CREATE TABLE IF NOT EXISTS cohort_definitions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    account_id UUID NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    dataset_id UUID NOT NULL REFERENCES datasets(id) ON DELETE CASCADE,
+    start_event VARCHAR(255) NOT NULL,
+    return_event VARCHAR(255) NOT NULL,
+    time_window INTERVAL NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Funnel Definitions
+CREATE TABLE IF NOT EXISTS funnel_definitions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    account_id UUID NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    dataset_id UUID NOT NULL REFERENCES datasets(id) ON DELETE CASCADE,
+    steps JSONB NOT NULL,
+    conversion_window INTERVAL NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Segment Definitions
+CREATE TABLE IF NOT EXISTS segment_definitions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    account_id UUID NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    dataset_id UUID NOT NULL REFERENCES datasets(id) ON DELETE CASCADE,
+    rules JSONB NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

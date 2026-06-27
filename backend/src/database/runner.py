@@ -70,6 +70,8 @@ class MigrationRunner:
                     raise
 
 if __name__ == "__main__":
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
     logging.basicConfig(level=logging.INFO)
     dsn = os.environ.get("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/postgres")
     migrations_dir = os.path.join(os.path.dirname(__file__), "migrations")

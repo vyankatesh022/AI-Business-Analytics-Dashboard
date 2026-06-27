@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from psycopg import AsyncConnection
 
-from src.database.connection import get_db
+from src.database.connection import get_db_connection
 from src.domains.ml.models import (
     ModelCreate,
     ModelResponse,
@@ -17,7 +17,7 @@ from src.domains.ml.models import (
 )
 from src.domains.ml.repositories import MLRepository
 from src.domains.ml.services import PredictionServiceFoundation, TrainingPipeline
-from src.security.rbac import Role, require_role
+
 
 router = APIRouter(prefix="/ml", tags=["machine_learning"])
 
@@ -25,7 +25,7 @@ router = APIRouter(prefix="/ml", tags=["machine_learning"])
 @router.post("/models", response_model=ModelResponse, status_code=status.HTTP_201_CREATED)
 async def create_model(
     request: ModelCreate,
-    db: AsyncConnection = Depends(get_db),
+    db: AsyncConnection = Depends(get_db_connection),
     tenant_id: UUID = Depends(lambda: UUID("00000000-0000-0000-0000-000000000000")),
     organization_id: UUID = Depends(lambda: UUID("00000000-0000-0000-0000-000000000000")),
     user_id: UUID = Depends(lambda: UUID("00000000-0000-0000-0000-000000000000")),
@@ -41,7 +41,7 @@ async def create_model(
 async def list_models(
     limit: int = 50,
     offset: int = 0,
-    db: AsyncConnection = Depends(get_db),
+    db: AsyncConnection = Depends(get_db_connection),
     tenant_id: UUID = Depends(lambda: UUID("00000000-0000-0000-0000-000000000000")),
     organization_id: UUID = Depends(lambda: UUID("00000000-0000-0000-0000-000000000000")),
 ):
@@ -54,7 +54,7 @@ async def list_models(
 async def train_model_version(
     model_id: UUID,
     request: ModelVersionCreate,
-    db: AsyncConnection = Depends(get_db),
+    db: AsyncConnection = Depends(get_db_connection),
     tenant_id: UUID = Depends(lambda: UUID("00000000-0000-0000-0000-000000000000")),
     organization_id: UUID = Depends(lambda: UUID("00000000-0000-0000-0000-000000000000")),
     user_id: UUID = Depends(lambda: UUID("00000000-0000-0000-0000-000000000000")),
@@ -91,7 +91,7 @@ async def train_model_version(
 @router.get("/models/{model_id}/versions", response_model=List[ModelVersionResponse])
 async def list_model_versions(
     model_id: UUID,
-    db: AsyncConnection = Depends(get_db),
+    db: AsyncConnection = Depends(get_db_connection),
     tenant_id: UUID = Depends(lambda: UUID("00000000-0000-0000-0000-000000000000")),
 ):
     repo = MLRepository(db)
@@ -102,7 +102,7 @@ async def list_model_versions(
 @router.post("/endpoints", response_model=SageMakerEndpointResponse, status_code=status.HTTP_201_CREATED)
 async def deploy_endpoint(
     request: SageMakerEndpointCreate,
-    db: AsyncConnection = Depends(get_db),
+    db: AsyncConnection = Depends(get_db_connection),
     tenant_id: UUID = Depends(lambda: UUID("00000000-0000-0000-0000-000000000000")),
     organization_id: UUID = Depends(lambda: UUID("00000000-0000-0000-0000-000000000000")),
 ):
@@ -116,7 +116,7 @@ async def deploy_endpoint(
 @router.post("/predict", response_model=PredictionResponse)
 async def predict(
     request: PredictionRequest,
-    db: AsyncConnection = Depends(get_db),
+    db: AsyncConnection = Depends(get_db_connection),
     tenant_id: UUID = Depends(lambda: UUID("00000000-0000-0000-0000-000000000000")),
 ):
     service = PredictionServiceFoundation(db)
