@@ -1,6 +1,7 @@
 import * as React from "react"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Header } from "@/components/layout/header"
+import { CommandPalette } from "@/components/CommandPalette"
 
 import { AiCopilotWrapper } from "@/features/ai-copilot/components/AiCopilotWrapper"
 
@@ -20,6 +21,7 @@ export default function DashboardLayout({
           </main>
         </div>
       </div>
+      <CommandPalette />
     </AiCopilotWrapper>
   )
 }

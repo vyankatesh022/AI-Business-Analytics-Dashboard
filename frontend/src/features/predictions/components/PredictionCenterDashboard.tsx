@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { usePredictions } from '../context/PredictionsContext';
 import { ModelRegistry } from './ModelRegistry';
 import { ForecastVisualization } from './ForecastVisualization';
@@ -9,6 +10,19 @@ import { PredictionExplainability } from './PredictionExplainability';
 import { PredictionStatsCards } from './PredictionStatsCards';
 import { CreatePredictionForm } from './CreatePredictionForm';
 import { RecentPredictions } from './RecentPredictions';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
+};
 
 export const PredictionCenterDashboard: React.FC = () => {
   const { loading, error } = usePredictions();
@@ -31,9 +45,14 @@ export const PredictionCenterDashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 pb-12">
+    <motion.div 
+      className="space-y-6 pb-12"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       {/* Header */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <motion.div variants={itemVariants} className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">
             Predictions
@@ -41,26 +60,47 @@ export const PredictionCenterDashboard: React.FC = () => {
           <p className="text-slate-500 text-sm mt-1">Generate AI-powered predictions from your data and make smarter business decisions.</p>
         </div>
         <div className="flex gap-3">
-          <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg shadow-sm transition flex items-center gap-2">
+          <button 
+            onClick={() => {
+              document.getElementById('create-prediction-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              // Optional: Add a subtle flash effect to draw attention
+              const form = document.getElementById('create-prediction-form');
+              if (form) {
+                form.classList.add('ring-4', 'ring-indigo-500/30', 'rounded-2xl', 'transition-all', 'duration-500');
+                setTimeout(() => {
+                  form.classList.remove('ring-4', 'ring-indigo-500/30');
+                }, 1000);
+              }
+            }}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg shadow-sm transition flex items-center gap-2"
+          >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             New Prediction
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Row 1: Stats Cards */}
-      <PredictionStatsCards />
+      <motion.div variants={itemVariants}>
+        <PredictionStatsCards />
+      </motion.div>
 
       {/* Row 2: Create Form & Forecast Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 h-full">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div id="create-prediction-form" className="lg:col-span-1 h-full">
           <CreatePredictionForm />
         </div>
-        <div className="lg:col-span-2 space-y-6">
+        <div id="forecast-chart-area" className="lg:col-span-2 space-y-6">
           {chartIds.map((id) => (
-            <div key={id} className="relative group">
+            <motion.div 
+              key={id} 
+              className="relative group"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+            >
               <ForecastVisualization />
               {chartIds.length > 1 && (
                 <button
@@ -73,29 +113,36 @@ export const PredictionCenterDashboard: React.FC = () => {
                   </svg>
                 </button>
               )}
-            </div>
+            </motion.div>
           ))}
-          <button 
-            onClick={addChart}
-            className="w-full border-2 border-dashed border-slate-200 rounded-2xl p-4 text-slate-500 font-medium hover:bg-slate-50 hover:text-indigo-600 transition flex items-center justify-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Add Another Chart
-          </button>
+          
+          <div className="flex justify-center pt-2">
+            <motion.button 
+              whileHover={{ y: -2, shadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)" }}
+              whileTap={{ scale: 0.98 }}
+              onClick={addChart}
+              className="bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-600 hover:text-indigo-600 hover:border-indigo-200 font-medium text-sm rounded-full px-5 py-2.5 flex items-center gap-2 transition-colors shadow-sm"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add Comparison Chart
+            </motion.button>
+          </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Row 3: Small Widgets Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <DecisionIntelligenceWidget />
         <ModelRegistry />
         <PredictionExplainability />
-      </div>
+      </motion.div>
 
       {/* Row 4: Recent Predictions */}
-      <RecentPredictions />
-    </div>
+      <motion.div variants={itemVariants}>
+        <RecentPredictions />
+      </motion.div>
+    </motion.div>
   );
 };

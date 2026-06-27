@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import { usePredictions } from '../context/PredictionsContext';
 import { TrendingUp, Package, Target, Bell } from 'lucide-react';
 
@@ -12,7 +13,11 @@ export const PredictionStatsCards: React.FC = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {/* Total Predictions */}
-      <div className="bg-indigo-500 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
+      <motion.div 
+        whileHover={{ y: -4, scale: 1.01 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        className="bg-indigo-500 rounded-2xl p-6 text-white shadow-md relative overflow-hidden cursor-default"
+      >
         <div className="absolute right-0 top-0 opacity-10 transform translate-x-4 -translate-y-4">
           <TrendingUp size={120} />
         </div>
@@ -26,10 +31,14 @@ export const PredictionStatsCards: React.FC = () => {
             {stats.totalPredictionsTrend}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Active Models */}
-      <div className="bg-blue-500 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
+      <motion.div 
+        whileHover={{ y: -4, scale: 1.01 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        className="bg-blue-500 rounded-2xl p-6 text-white shadow-md relative overflow-hidden cursor-default"
+      >
         <div className="absolute right-0 top-0 opacity-10 transform translate-x-4 -translate-y-4">
           <Package size={120} />
         </div>
@@ -43,10 +52,14 @@ export const PredictionStatsCards: React.FC = () => {
             {stats.activeModelsTrend}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Avg Accuracy */}
-      <div className="bg-emerald-400 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
+      <motion.div 
+        whileHover={{ y: -4, scale: 1.01 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        className="bg-emerald-400 rounded-2xl p-6 text-white shadow-md relative overflow-hidden cursor-default"
+      >
         <div className="absolute right-0 top-0 opacity-10 transform translate-x-4 -translate-y-4">
           <Target size={120} />
         </div>
@@ -60,10 +73,14 @@ export const PredictionStatsCards: React.FC = () => {
             {stats.avgAccuracyTrend}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Alerts */}
-      <div className="bg-violet-500 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
+      <motion.div 
+        whileHover={{ y: -4, scale: 1.01 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        className="bg-violet-500 rounded-2xl p-6 text-white shadow-md relative overflow-hidden cursor-default"
+      >
         <div className="absolute right-0 top-0 opacity-10 transform translate-x-4 -translate-y-4">
           <Bell size={120} />
         </div>
@@ -77,7 +94,7 @@ export const PredictionStatsCards: React.FC = () => {
             {stats.alertsTrend}
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

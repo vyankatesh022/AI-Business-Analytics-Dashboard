@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
 
 const mockRevenueData = [
@@ -59,6 +59,20 @@ export const ForecastVisualization: React.FC = () => {
   const [chartType, setChartType] = useState('Area');
   const activeData = dataMap[selectedView];
 
+  const [highlight, setHighlight] = useState(false);
+
+  useEffect(() => {
+    const handleLoadChart = (e: any) => {
+      if (e.detail && dataMap[e.detail]) {
+        setSelectedView(e.detail);
+        setHighlight(true);
+        setTimeout(() => setHighlight(false), 1500);
+      }
+    };
+    window.addEventListener('load-prediction-chart', handleLoadChart);
+    return () => window.removeEventListener('load-prediction-chart', handleLoadChart);
+  }, []);
+
   const renderChart = () => {
     const commonProps = {
       data: activeData,
@@ -98,9 +112,10 @@ export const ForecastVisualization: React.FC = () => {
       );
     }
 
-    // Default Area Chart
+    // Default Area Chart (using ComposedChart to support mixed Area and Line)
+    const { ComposedChart } = require('recharts');
     return (
-      <AreaChart {...commonProps}>
+      <ComposedChart {...commonProps}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
         <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} dy={10} />
         <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} dx={-10} tickFormatter={(val) => selectedView === 'Revenue Forecast' ? `$${val}` : `${val}`} />
@@ -112,12 +127,12 @@ export const ForecastVisualization: React.FC = () => {
         <Line type="monotone" dataKey="worst_forecast" stroke="#F43F5E" strokeWidth={2} strokeDasharray="3 3" name="Worst Case" dot={false} />
         <Area type="monotone" dataKey="upper" stroke="none" fill="#8B5CF6" fillOpacity={0.1} name="Confidence Upper" />
         <Area type="monotone" dataKey="lower" stroke="none" fill="#8B5CF6" fillOpacity={0.1} name="Confidence Lower" />
-      </AreaChart>
+      </ComposedChart>
     );
   };
 
   return (
-    <div className="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm h-full flex flex-col relative group">
+    <div className={`bg-white border rounded-2xl p-6 shadow-sm h-full flex flex-col relative group transition-all duration-500 ${highlight ? 'ring-4 ring-indigo-500/30 border-indigo-300' : 'border-slate-200/60'}`}>
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
           <svg className="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
