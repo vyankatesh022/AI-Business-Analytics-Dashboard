@@ -12,6 +12,7 @@ from .models import (
     ProcessingJobStatusUpdate,
     ProcessingTaskCreate,
     ProcessingTaskStatusUpdate,
+    ProcessingHistoryCreate,
 )
 
 
@@ -249,4 +250,49 @@ class ProcessingRepository:
                 """,
                 (job_id, tenant_id),
             )
+            return await cursor.fetchall()
+
+    # ------------------------------------------------------------------------
+    # Processing History
+    # ------------------------------------------------------------------------
+    async def create_processing_history(
+        self, tenant_id: UUID, organization_id: UUID, history: ProcessingHistoryCreate
+    ) -> Dict[str, Any]:
+        async with self.conn.cursor(row_factory=dict_row) as cursor:
+            await cursor.execute(
+                """
+                INSERT INTO processing_history (
+                    tenant_id, organization_id, job_id, dataset_id, user_id, action, details
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING *
+                """,
+                (
+                    tenant_id,
+                    organization_id,
+                    history.job_id,
+                    history.dataset_id,
+                    history.user_id,
+                    history.action,
+                    json.dumps(history.details),
+                ),
+            )
+            return await cursor.fetchone()
+
+    async def list_processing_history(
+        self, tenant_id: UUID, organization_id: UUID, dataset_id: Optional[UUID] = None, job_id: Optional[UUID] = None, limit: int = 50, offset: int = 0
+    ) -> List[Dict[str, Any]]:
+        async with self.conn.cursor(row_factory=dict_row) as cursor:
+            query = "SELECT * FROM processing_history WHERE tenant_id = %s AND organization_id = %s"
+            params = [tenant_id, organization_id]
+            if dataset_id:
+                query += " AND dataset_id = %s"
+                params.append(dataset_id)
+            if job_id:
+                query += " AND job_id = %s"
+                params.append(job_id)
+            query += " ORDER BY created_at DESC LIMIT %s OFFSET %s"
+            params.extend([limit, offset])
+
+            await cursor.execute(query, tuple(params))
             return await cursor.fetchall()
