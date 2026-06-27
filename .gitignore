@@ -44,3 +44,11 @@ dataset-exports/
 billing-exports/
 invoice-exports/
 payment-exports/
+
+# Phase 7: Data Processing, Features & ML
+processing-temp/
+feature-store-dumps/
+model-artifacts/
+training-outputs/
+sagemaker-metadata/
+.aws/
