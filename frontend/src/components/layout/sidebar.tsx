@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { 
   BarChart3, 
@@ -21,6 +21,13 @@ import {
   Code
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface NavItem {
   title: string
@@ -37,18 +44,20 @@ const navItems: NavItem[] = [
   { title: "Workflows", href: "/workflows", icon: <Workflow className="h-5 w-5" /> },
 ]
 
-const bottomNavItems: NavItem[] = [
-  { title: "Organizations", href: "/organizations", icon: <Building2 className="h-5 w-5" /> },
-  { title: "Integrations", href: "/integrations", icon: <Network className="h-5 w-5" /> },
-  { title: "Developer", href: "/integrations/api-keys", icon: <Code className="h-5 w-5" /> },
-  { title: "Billing", href: "/billing", icon: <CreditCard className="h-5 w-5" /> },
-  { title: "Settings", href: "/settings", icon: <Settings className="h-5 w-5" /> },
+const settingsMenuItems = [
+  { title: "Organizations", href: "/organizations", icon: Building2 },
+  { title: "Integrations", href: "/integrations", icon: Network },
+  { title: "Developer", href: "/developer", icon: Code },
+  { title: "Billing", href: "/billing", icon: CreditCard },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const [isCollapsed, setIsCollapsed] = React.useState(false)
   const [isMobileOpen, setIsMobileOpen] = React.useState(false)
+
+  const isSettingsActive = settingsMenuItems.some(item => pathname.startsWith(item.href))
 
   return (
     <>
@@ -79,7 +88,7 @@ export function Sidebar() {
         )}
       >
         <div className={cn(
-          "flex h-16 items-center border-b border-slate-200 px-4",
+          "flex h-16 items-center border-b border-slate-200 px-4 shrink-0",
           isCollapsed ? "justify-center" : "justify-between"
         )}>
           {!isCollapsed && (
@@ -131,30 +140,52 @@ export function Sidebar() {
           </div>
         </div>
 
-        <div className="p-4 border-t border-slate-200 bg-slate-50/50">
-          <div className="space-y-1.5">
-            {bottomNavItems.map((item) => {
-              const isActive = pathname.startsWith(item.href)
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                    isActive 
-                      ? "bg-white text-slate-900 shadow-sm border border-slate-200" 
-                      : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 border border-transparent",
-                    isCollapsed && "justify-center px-2"
-                  )}
-                  title={isCollapsed ? item.title : undefined}
-                  onClick={() => setIsMobileOpen(false)}
-                >
-                  {item.icon}
-                  {!isCollapsed && <span>{item.title}</span>}
-                </Link>
-              )
-            })}
-          </div>
+        <div className="mt-auto shrink-0 p-4 border-t border-slate-200 bg-slate-50/50">
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className={cn(
+                "w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 outline-none",
+                isSettingsActive
+                  ? "bg-white text-slate-900 shadow-sm border border-slate-200"
+                  : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 border border-transparent",
+                isCollapsed && "justify-center px-2"
+              )}
+              title={isCollapsed ? "Settings" : undefined}
+            >
+              <Settings className="h-5 w-5 shrink-0" />
+              {!isCollapsed && <span>Settings</span>}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent 
+              className="w-56 rounded-xl shadow-lg p-2" 
+              side={isCollapsed ? "right" : "top"} 
+              align={isCollapsed ? "end" : "center"} 
+              sideOffset={16}
+            >
+              <DropdownMenuGroup className="space-y-0.5">
+                {settingsMenuItems.map((item) => {
+                  const isActive = pathname.startsWith(item.href)
+                  return (
+                    <DropdownMenuItem
+                      key={item.href}
+                      onClick={() => {
+                        router.push(item.href)
+                        setIsMobileOpen(false)
+                      }}
+                      className={cn(
+                        "flex items-center gap-3 cursor-pointer rounded-xl px-2.5 py-2 text-sm transition-colors",
+                        isActive
+                          ? "bg-indigo-50 text-indigo-600 focus:bg-indigo-50 focus:text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400 dark:focus:bg-indigo-500/10 dark:focus:text-indigo-400"
+                          : "text-slate-600 focus:bg-slate-100 focus:text-slate-900 dark:text-slate-300 dark:focus:bg-slate-800 dark:focus:text-slate-100"
+                      )}
+                    >
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </DropdownMenuItem>
+                  )
+                })}
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </aside>
     </>
