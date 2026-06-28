@@ -26,13 +26,22 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-#Docs
-docs 
+# Docs (un-ignoring so architecture/devops docs are tracked)
+# docs
+
 # Security Rules 
 .env 
 .env.* 
+!**/.env.example
+!*.example
+
 backend/.env
 backend/.env.*
+!backend/.env.example
+
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
 *.pem 
 *.key 
 *.crt 

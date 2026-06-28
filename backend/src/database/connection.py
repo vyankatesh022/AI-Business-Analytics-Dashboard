@@ -61,6 +61,10 @@ async def get_db_connection() -> AsyncGenerator[DatabaseConnectionWrapper, None]
     async with pool.connection() as conn:
         yield DatabaseConnectionWrapper(conn)
 
+def get_db_dsn() -> str:
+    return DATABASE_URL
+
+
 async def open_pool():
     if pool:
         await pool.open()

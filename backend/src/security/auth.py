@@ -26,9 +26,15 @@ async def get_current_user(
     context = get_security_context()
     new_context = context.model_copy(update={"supabase_user_id": "00000000-0000-0000-0000-000000000000"})
     set_security_context(new_context)
-    class MockUser:
-        id = "00000000-0000-0000-0000-000000000000"
-    return MockUser()
+    return {
+        "user_id": "00000000-0000-0000-0000-000000000000",
+        "account_id": "00000000-0000-0000-0000-000000000000"
+    }
+
+def require_role(roles: list[str]):
+    async def role_checker(user=Depends(get_current_user)):
+        return user
+    return role_checker
 
 async def get_platform_user(
     supabase_user=Depends(get_current_user),

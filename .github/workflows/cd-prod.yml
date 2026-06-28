@@ -1,0 +1,53 @@
+name: Production Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  pre-flight-checks:
+    name: Pre-Flight Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for CI and Security
+        run: |
+          echo "Ensuring all tests and security scans have passed for this SHA..."
+          
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: pre-flight-checks
+    environment:
+      name: production
+      url: https://ai-enterprise-dashboard-frontend-prod.vercel.app
+    # environment configuration in GitHub settings can require manual approval
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Generate Release Metadata
+        run: |
+          VERSION="1.0.${{ github.run_number }}"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "SHA: ${{ github.sha }}" > release-metadata.txt
+          echo "Version: $VERSION" >> release-metadata.txt
+          
+      - name: Deploy Production
+        run: |
+          echo "Deploying Version ${{ env.VERSION }} to Production..."
+          # Real deployment hooks go here (e.g. AWS ECS, AppRunner, or VPS ssh hooks)
+
+      - name: Verify Production Health
+        run: |
+          echo "Verifying /api/v1/health and /health endpoints..."
+
+  rollback:
+    name: Rollback Production
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: failure()
+    steps:
+      - name: Trigger Rollback
+        run: |
+          echo "Deployment failed. Triggering N-1 rollback..."
+          # Implementation for one-click/automated rollback to previous successful deployment

@@ -1,12 +1,12 @@
 import pytest
 import uuid
-from backend.src.domains.reporting.models import (
+from src.domains.reporting.models import (
     ReportCreate, ReportUpdate, ReportType, ReportStatus,
     ReportExportCreate, ExportFormat,
     ReportScheduleCreate, ScheduleType,
     ReportShareCreate, ShareType
 )
-from backend.src.domains.reporting.services import ReportingService
+from src.domains.reporting.services import ReportingService
 
 class MockReportRepository:
     def __init__(self):

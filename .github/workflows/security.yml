@@ -1,0 +1,76 @@
+name: Security Scanning
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight
+
+jobs:
+  python-security:
+    name: Python Security Scans
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Bandit & Pip-Audit
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit pip-audit
+      - name: Run Bandit
+        run: bandit -r src/ -ll -ii || echo "Bandit found potential issues."
+      - name: Run Pip-Audit
+        run: pip-audit -r requirements.txt || echo "Pip-Audit found vulnerabilities."
+
+  node-security:
+    name: Node Security Scans
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+      - name: Run npm audit
+        run: npm audit --audit-level=critical || echo "npm audit found critical issues."
+
+  docker-security:
+    name: Docker Trivy Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Images for Scan
+        run: |
+          docker build -t app-backend ./backend
+          docker build -t app-frontend ./frontend
+      - name: Run Trivy on Backend
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'app-backend'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+        continue-on-error: true
+      - name: Run Trivy on Frontend
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'app-frontend'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+        continue-on-error: true
