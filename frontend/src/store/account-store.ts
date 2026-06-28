@@ -20,8 +20,10 @@ interface AccountState {
 export const useAccountStore = create<AccountState>()(
   persist(
     (set, get) => ({
-      accounts: [],
-      activeAccountId: null,
+      accounts: [
+        { id: 'tenant-1', name: 'Acme Corp', slug: 'acme-corp', role: 'admin' }
+      ],
+      activeAccountId: 'tenant-1',
       setAccounts: (accounts) => {
         set({ accounts });
         const currentActive = get().activeAccountId;
