@@ -1,7 +1,10 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
+import { toast } from "sonner"
 import { 
   User, 
   Settings, 
@@ -28,6 +31,7 @@ import {
 import { Button } from "@/components/ui/button"
 
 export function UserMenu() {
+  const router = useRouter()
   const { setTheme } = useTheme()
 
   return (
@@ -48,17 +52,9 @@ export function UserMenu() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push("/profile")}>
             <User className="mr-2 h-4 w-4" />
             <span>Profile</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Building2 className="mr-2 h-4 w-4" />
-            <span>Organization Settings</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Preferences</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
@@ -88,7 +84,10 @@ export function UserMenu() {
           </DropdownMenuSub>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => {
+          toast.success("Logged out successfully")
+          router.push("/")
+        }}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>

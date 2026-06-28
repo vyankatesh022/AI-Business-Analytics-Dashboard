@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { 
+  LayoutDashboard,
   BarChart3, 
   Database, 
   BrainCircuit, 
@@ -36,6 +37,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
+  { title: "Dashboard", href: "/", icon: <LayoutDashboard className="h-5 w-5" /> },
   { title: "Analytics", href: "/analytics", icon: <BarChart3 className="h-5 w-5" /> },
   { title: "Workspace", href: "/workspace", icon: <Database className="h-5 w-5" /> },
   { title: "Predictions", href: "/predictions", icon: <BrainCircuit className="h-5 w-5" /> },
@@ -114,7 +116,7 @@ export function Sidebar() {
           <div className="space-y-1.5">
             {!isCollapsed && <p className="px-3 text-xs font-semibold tracking-wider text-slate-400 uppercase mb-2">Overview</p>}
             {navItems.map((item) => {
-              const isActive = pathname.startsWith(item.href)
+              const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)
               return (
                 <Link
                   key={item.href}
