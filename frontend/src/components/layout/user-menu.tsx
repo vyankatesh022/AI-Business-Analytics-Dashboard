@@ -33,6 +33,17 @@ import { Button } from "@/components/ui/button"
 export function UserMenu() {
   const router = useRouter()
   const { setTheme } = useTheme()
+  const [userName, setUserName] = React.useState("Admin User")
+  const [userEmail, setUserEmail] = React.useState("admin@enterprise.ai")
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const name = localStorage.getItem("user_name")
+      const email = localStorage.getItem("user_email")
+      if (name) setUserName(name)
+      if (email) setUserEmail(email)
+    }
+  }, [])
 
   return (
     <DropdownMenu>
@@ -43,9 +54,9 @@ export function UserMenu() {
         <DropdownMenuGroup>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">Admin User</p>
+              <p className="text-sm font-medium leading-none">{userName}</p>
               <p className="text-xs leading-none text-muted-foreground">
-                admin@enterprise.ai
+                {userEmail}
               </p>
             </div>
           </DropdownMenuLabel>
@@ -85,6 +96,11 @@ export function UserMenu() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => {
+          if (typeof window !== "undefined") {
+            localStorage.removeItem("user_name")
+            localStorage.removeItem("user_email")
+            localStorage.removeItem("user_company")
+          }
           toast.success("Logged out successfully")
           router.push("/")
         }}>

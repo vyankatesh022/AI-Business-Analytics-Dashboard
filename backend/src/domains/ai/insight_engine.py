@@ -26,17 +26,32 @@ class InsightEngine:
         async for chunk in self.llm.stream_response(messages):
             yield chunk
 
-    async def explain_anomaly(self, metric_name: str, current_value: float, historical_context: Dict[str, Any]) -> str:
+    async def explain_anomaly(self, metric_name: str, total_anomalies: int, anomaly_details: list) -> str:
         """
-        Generates an explanation for an anomaly in a specific metric.
+        Generates an explanation for detected anomalies in a specific metric.
         """
         context = {
             "metric": metric_name,
-            "current_value": current_value,
-            "historical_data": historical_context
+            "total_anomalies": total_anomalies,
+            "anomaly_details": anomaly_details
         }
         messages = self.prompt_orchestrator.build_prompt(
-            f"Explain why {metric_name} changed significantly to {current_value}.", 
+            f"We detected {total_anomalies} anomalies in the '{metric_name}' metric. Please provide a brief business explanation or hypotheses for these outliers.", 
+            context
+        )
+        return await self.llm.generate_response(messages)
+
+    async def explain_forecast(self, metric_name: str, algorithm_used: str, forecast_summary: list) -> str:
+        """
+        Generates a business narrative for a forecast.
+        """
+        context = {
+            "metric": metric_name,
+            "algorithm": algorithm_used,
+            "forecast": forecast_summary
+        }
+        messages = self.prompt_orchestrator.build_prompt(
+            f"We generated a forecast for the '{metric_name}' metric using {algorithm_used}. Please provide a brief business summary of the predicted trend.", 
             context
         )
         return await self.llm.generate_response(messages)

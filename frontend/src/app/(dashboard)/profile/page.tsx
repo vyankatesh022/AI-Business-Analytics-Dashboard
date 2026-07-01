@@ -30,6 +30,30 @@ import Image from "next/image";
 export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState<string | null>(null);
   
+  // User profile state
+  const [profile, setProfile] = useState({
+    firstName: 'Admin',
+    lastName: 'User',
+    email: 'admin@enterprise.ai',
+    jobTitle: 'System Administrator'
+  });
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const name = localStorage.getItem('user_name');
+      const email = localStorage.getItem('user_email');
+      if (name) {
+        const parts = name.trim().split(' ');
+        const first = parts[0] || 'Admin';
+        const last = parts.slice(1).join(' ') || 'User';
+        setProfile(prev => ({ ...prev, firstName: first, lastName: last }));
+      }
+      if (email) {
+        setProfile(prev => ({ ...prev, email }));
+      }
+    }
+  }, []);
+
   // Profile Photo state
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -55,6 +79,10 @@ export default function ProfilePage() {
   const handleSave = (section: string) => {
     setIsLoading(section);
     setTimeout(() => {
+      if (section === 'Personal information' && typeof window !== 'undefined') {
+        localStorage.setItem('user_name', `${profile.firstName} ${profile.lastName}`.trim());
+        localStorage.setItem('user_email', profile.email);
+      }
       setIsLoading(null);
       toast.success(`${section} settings updated successfully.`);
     }, 800);
@@ -184,22 +212,40 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name</Label>
-                  <Input id="firstName" defaultValue="Admin" />
+                  <Input 
+                    id="firstName" 
+                    value={profile.firstName} 
+                    onChange={e => setProfile({...profile, firstName: e.target.value})} 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName">Last Name</Label>
-                  <Input id="lastName" defaultValue="User" />
+                  <Input 
+                    id="lastName" 
+                    value={profile.lastName} 
+                    onChange={e => setProfile({...profile, lastName: e.target.value})} 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input id="email" type="email" defaultValue="admin@enterprise.ai" className="pl-9" />
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      value={profile.email} 
+                      onChange={e => setProfile({...profile, email: e.target.value})} 
+                      className="pl-9" 
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="jobTitle">Job Title</Label>
-                  <Input id="jobTitle" defaultValue="System Administrator" />
+                  <Input 
+                    id="jobTitle" 
+                    value={profile.jobTitle} 
+                    onChange={e => setProfile({...profile, jobTitle: e.target.value})} 
+                  />
                 </div>
               </div>
             </CardContent>

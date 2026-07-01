@@ -58,8 +58,22 @@ export function Sidebar() {
   const router = useRouter()
   const [isCollapsed, setIsCollapsed] = React.useState(false)
   const [isMobileOpen, setIsMobileOpen] = React.useState(false)
+  const [companyName, setCompanyName] = React.useState("Acme Corp")
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const company = localStorage.getItem("user_company")
+      if (company) setCompanyName(company)
+    }
+  }, [])
 
   const isSettingsActive = settingsMenuItems.some(item => pathname.startsWith(item.href))
+
+  const getInitials = (name: string) => {
+    const parts = name.trim().split(" ")
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
+    return name.slice(0, 2).toUpperCase()
+  }
 
   return (
     <>
@@ -96,9 +110,9 @@ export function Sidebar() {
           {!isCollapsed && (
             <div className="flex items-center gap-3 font-semibold text-sm tracking-tight cursor-pointer group">
               <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-blue-500 text-white flex items-center justify-center text-xs font-bold shadow-md shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-all">
-                AC
+                {getInitials(companyName)}
               </div>
-              <span className="text-slate-900 group-hover:text-indigo-600 transition-colors">Acme Corp</span>
+              <span className="text-slate-900 group-hover:text-indigo-600 transition-colors">{companyName}</span>
             </div>
           )}
           <Button
