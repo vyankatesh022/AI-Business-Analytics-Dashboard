@@ -37,7 +37,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { title: "Dashboard", href: "/", icon: <LayoutDashboard className="h-5 w-5" /> },
+  { title: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
   { title: "Analytics", href: "/analytics", icon: <BarChart3 className="h-5 w-5" /> },
   { title: "Workspace", href: "/workspace", icon: <Database className="h-5 w-5" /> },
   { title: "Predictions", href: "/predictions", icon: <BrainCircuit className="h-5 w-5" /> },

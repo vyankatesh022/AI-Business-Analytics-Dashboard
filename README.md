@@ -42,7 +42,7 @@ Built on a modern microservices-inspired architecture, the platform separates th
 - **Analytics Platform**: Real-time dashboards with interactive, drill-down capabilities.
 - **Business Intelligence**: Custom report generation with automated delivery schedules.
 - **AI Copilot**: Context-aware natural language assistant for querying organizational data.
-- **Prediction Platform**: ML-driven forecasting for sales, churn, and operational metrics.
+- **Prediction Platform**: Built-in ML-driven time-series forecasting (using statsmodels/pandas) for sales, revenue, and operational metrics.
 - **Workflow Automation**: Event-driven triggers for business processes (e.g., alert on revenue drop).
 - **Integration Hub**: Seamless connection to external CRMs, ERPs, and APIs.
 - **Governance & Compliance**: Enforced data policies, SOC 2 readiness, and strict PII handling.
@@ -104,7 +104,7 @@ graph TD
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 15, React 19, TypeScript, TailwindCSS, shadcn/ui
-- **Backend**: FastAPI, Python 3.12+, Pydantic, SQLAlchemy, psycopg3
+- **Backend**: FastAPI, Python 3.12+, Pydantic, SQLAlchemy, psycopg3, statsmodels, pandas
 - **Database**: PostgreSQL (Multi-tenant), Redis (Caching/Queues)
 - **Infrastructure**: Docker, Kubernetes, Terraform
 - **Cloud**: AWS (EC2, S3, RDS, SageMaker)
