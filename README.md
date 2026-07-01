@@ -39,6 +39,11 @@ Built on a modern microservices-inspired architecture, the platform separates th
 
 ## ✨ Key Features
 
+- **Actionable Decision Command Center**: Interactive real-time BI dashboard closing the loop between AI insights and operational execution.
+- **Autonomous AI Decision Queue**: Ranked AI recommendation cards displaying projected ARR impact and root cause analysis with one-click automated workflow execution and timestamped audit trails.
+- **What-If Scenario Simulator Engine**: Interactive sliders for enterprise discount caps, marketing budgets, and server auto-scaling that dynamically recalculate 90-day revenue, churn, and LTV projections.
+- **Actionable KPI Grid & Triage Drawers**: Dynamic multi-region and time-horizon responsive cards featuring expandable inline action panels for instant anomaly resolution.
+- **Human-in-the-Loop Governance Feed**: Interactive workflow tracker allowing executives to approve or dismiss pending AI recommendations with real-time telemetry logging.
 - **Analytics Platform**: Real-time dashboards with interactive, drill-down capabilities.
 - **Business Intelligence**: Custom report generation with automated delivery schedules.
 - **AI Copilot**: Context-aware natural language assistant for querying organizational data.
